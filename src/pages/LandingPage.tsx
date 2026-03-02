@@ -462,7 +462,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             </div>
 
             <div className="relative">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-[#FFFBF0] rounded-2xl p-6 card-shadow flex flex-col">
                   <div className="w-12 h-12 bg-[#F5C518] rounded-xl flex items-center justify-center mb-4">
                     <Briefcase className="w-6 h-6 text-[#1A1A1A]" />

@@ -322,7 +322,7 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                         {/* Alternative Login Methods */}
                         {!otpSent && (
                             <div className="space-y-4 pt-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <button
                                         type="button"
                                         onClick={() => setLoginMethod('password')}

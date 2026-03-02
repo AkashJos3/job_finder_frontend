@@ -78,9 +78,9 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
       <StudentSidebar activeView="student-applications" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
-      <main className="flex-1 ml-64">
+      <main className="flex-1 lg:ml-64">
         {/* Header */}
-        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
+        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-8">
@@ -117,7 +117,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
         </header>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           <p className="text-gray-500 dark:text-gray-400 mb-8">Track your progress for local part-time opportunities.</p>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

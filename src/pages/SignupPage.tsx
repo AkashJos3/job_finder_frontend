@@ -206,7 +206,7 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
                       <label className="block text-sm font-medium text-[#1A1A1A] mb-3">
                         I am a...
                       </label>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button
                           type="button"
                           onClick={() => setSelectedRole('student')}

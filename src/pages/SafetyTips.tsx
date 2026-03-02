@@ -8,7 +8,7 @@ interface SafetyTipsProps {
 export function SafetyTips({ onNavigate }: SafetyTipsProps) {
     return (
         <div className="min-h-screen bg-[#FFFBF0]">
-            <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4">
+            <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <button onClick={() => onNavigate('landing')} className="flex items-center gap-2 text-gray-600 hover:text-[#1A1A1A] transition-colors">
                         <ChevronLeft className="w-5 h-5" /> Back to Home

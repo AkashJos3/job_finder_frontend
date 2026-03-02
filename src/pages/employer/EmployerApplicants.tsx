@@ -136,9 +136,9 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
       )}
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
+        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">Candidates</h1>
             <div className="flex items-center gap-4">

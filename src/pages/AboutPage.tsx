@@ -94,7 +94,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
                 employers who understand the unique needs of student workers.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="bg-[#FFFBF0] rounded-2xl p-6 text-center">
                 <p className="text-4xl font-bold text-[#F5C518] mb-2">10K+</p>
                 <p className="text-gray-600">Students Helped</p>

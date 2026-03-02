@@ -115,9 +115,9 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
       )}
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
 
@@ -131,7 +131,7 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
         </header>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Title */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-[#1A1A1A] mb-1">Employer Approvals</h1>
@@ -353,7 +353,7 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                 </button>
               </div>
               <div className="p-6 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Business Name</p>
                     <p className="font-semibold text-[#1A1A1A] text-lg">{selectedEmployer.business_name}</p>

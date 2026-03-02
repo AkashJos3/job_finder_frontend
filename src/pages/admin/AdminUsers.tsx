@@ -150,9 +150,9 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
       )}
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 flex flex-col min-h-screen" >
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen" >
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4" >
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4" >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
 
@@ -166,7 +166,7 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
         </header>
 
         {/* Content */}
-        <div className="p-8" >
+        <div className="p-4 md:p-8" >
           {/* Title */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8" >
             <div>
@@ -409,7 +409,7 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
               </div>
 
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-3 rounded-xl">
                     <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Email</p>
                     <p className="text-sm font-medium text-[#1A1A1A] truncate">{selectedUser.email}</p>
@@ -421,7 +421,7 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
                 </div>
 
                 {selectedUser.role === 'student' ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-gray-50 p-3 rounded-xl">
                       <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">University</p>
                       <p className="text-sm font-medium text-[#1A1A1A]">{selectedUser.college}</p>
@@ -432,7 +432,7 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-gray-50 p-3 rounded-xl">
                       <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Company / Type</p>
                       <p className="text-sm font-medium text-[#1A1A1A]">{selectedUser.business}</p>

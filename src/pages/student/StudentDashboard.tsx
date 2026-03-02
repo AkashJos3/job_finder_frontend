@@ -210,9 +210,9 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
       <StudentSidebar activeView="student-dashboard" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
-      <main className="flex-1 ml-64">
+      <main className="flex-1 lg:ml-64">
         {/* Header */}
-        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
+        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
         </header>
 
         {/* Dashboard Content */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Summary Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {/* Nearby Jobs Card */}

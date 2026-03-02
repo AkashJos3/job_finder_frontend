@@ -9,7 +9,7 @@ export function CareerAdvice({ onNavigate }: CareerAdviceProps) {
     return (
         <div className="min-h-screen bg-[#FFFBF0]">
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4">
+            <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <button
                         onClick={() => onNavigate('landing')}

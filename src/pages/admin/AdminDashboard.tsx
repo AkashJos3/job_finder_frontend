@@ -105,9 +105,9 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
       <AdminSidebar activeView="admin-dashboard" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
         </header>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Title */}
           <div className="flex items-center justify-between mb-8">
             <div>

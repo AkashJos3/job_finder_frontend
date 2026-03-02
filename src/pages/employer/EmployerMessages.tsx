@@ -48,6 +48,7 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
   const [sendError, setSendError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -155,8 +156,8 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <EmployerSidebar activeView="employer-messages" onNavigate={onNavigate} onLogout={onLogout} />
-      <main className="flex-1 ml-64 flex flex-col min-h-screen">
-        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div>
             <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">Messages</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">Chat with candidates</p>
@@ -164,8 +165,8 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
         </header>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Chat List */}
-          <div className="w-80 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1A1A] flex flex-col">
+          {/* Chat List — full width on mobile, fixed 320px on desktop */}
+          <div className={`${showChatOnMobile ? 'hidden' : 'flex'} lg:flex w-full lg:w-80 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1A1A] flex-col`}>
             <div className="p-4 border-b border-gray-100 dark:border-gray-800">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -178,7 +179,7 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
               ) : conversations.map((chat) => (
                 <button
                   key={chat.id}
-                  onClick={() => setSelectedChat(chat)}
+                  onClick={() => { setSelectedChat(chat); setShowChatOnMobile(true); }}
                   className={`w-full p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] transition-colors ${selectedChat?.id === chat.id ? 'bg-[#F5C518]/10 dark:bg-[#F5C518]/20 border-l-4 border-[#F5C518]' : ''}`}
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
@@ -193,20 +194,23 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
             </div>
           </div>
 
-          {/* Chat Area */}
-          <div className="flex-1 flex flex-col bg-[#FFFBF0] dark:bg-[#121212]">
+          {/* Chat Area — full screen on mobile when chat selected */}
+          <div className={`${showChatOnMobile ? 'flex' : 'hidden'} lg:flex flex-1 flex-col bg-[#FFFBF0] dark:bg-[#121212]`}>
             {selectedChat ? (
               <>
-                {/* Chat Header */}
+                {/* Chat Header with back button on mobile */}
                 <div className="p-4 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                  <button onClick={() => setShowChatOnMobile(false)} className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mr-1">
+                    <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                  </button>
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                     {selectedChat.full_name ? selectedChat.full_name.substring(0, 2).toUpperCase() : 'U'}
                   </div>
                   <div>
                     <p className="font-semibold text-[#1A1A1A] dark:text-white">{selectedChat.full_name || 'Unknown User'}</p>
-                    <p className="text-xs text-green-500">Online</p>
                   </div>
                 </div>
+
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2">
