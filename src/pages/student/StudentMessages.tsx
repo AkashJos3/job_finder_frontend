@@ -1,8 +1,6 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
-import {
-  MessageSquare, Search, Send
-} from 'lucide-react';
+import { MessageSquare, Search, Send, Trash2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
@@ -12,12 +10,41 @@ interface StudentMessagesProps {
   onLogout: () => void;
 }
 
+// Format timestamp: "Today 2:30 PM", "Yesterday 11:45 AM", or "Mar 2, 9:00 AM"
+function formatMessageTime(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (isToday) return `Today ${time}`;
+  if (isYesterday) return `Yesterday ${time}`;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${time}`;
+}
+
+// Returns a date-only label like "Today", "Yesterday", "Monday, Mar 3"
+function getDateLabel(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  if (isToday) return 'Today';
+  if (isYesterday) return 'Yesterday';
+  return date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
 export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageInput, setMessageInput] = useState('');
   const [conversations, setConversations] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,9 +77,7 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
         const json = await res.json();
         setConversations(json.data || []);
       }
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
   };
 
   const fetchMessages = async (otherUserId: string) => {
@@ -66,9 +91,7 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
         const json = await res.json();
         setMessages(json.data || []);
       }
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
   };
 
   const handleSend = async () => {
@@ -78,50 +101,59 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
       if (!session) return;
       const res = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ receiver_id: selectedChat.id, content: messageInput })
       });
-      if (res.ok) {
-        setMessageInput('');
-        fetchMessages(selectedChat.id);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+      if (res.ok) { setMessageInput(''); fetchMessages(selectedChat.id); }
+    } catch (e) { console.error(e); }
   };
+
+  const handleDelete = async (msgId: string) => {
+    setDeletingId(msgId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`${API_URL}/api/messages/${msgId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (res.ok) {
+        setMessages(prev => prev.filter(m => m.id !== msgId));
+      }
+    } catch (e) { console.error(e); }
+    finally { setDeletingId(null); }
+  };
+
+  // Group messages by date
+  const groupedMessages = messages.reduce((groups: { label: string; msgs: any[] }[], msg) => {
+    const label = getDateLabel(msg.created_at);
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) {
+      last.msgs.push(msg);
+    } else {
+      groups.push({ label, msgs: [msg] });
+    }
+    return groups;
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <StudentSidebar activeView="student-messages" onNavigate={onNavigate} onLogout={onLogout} />
-
-      {/* Main Content */}
       <main className="flex-1 ml-64 flex flex-col min-h-screen">
-        {/* Header */}
         <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
-          <div className="flex items-center gap-4">
-
-            <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">Messages</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Chat with employers</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">Messages</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Chat with employers</p>
           </div>
         </header>
 
-        {/* Messages Content */}
-        <div className="flex h-[calc(100vh-89px)]"> {/* Adjusted height to fill remaining screen space */}
+        <div className="flex h-[calc(100vh-89px)]">
           {/* Chat List */}
           <div className="w-80 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1A1A] flex flex-col">
             <div className="p-4 border-b border-gray-100 dark:border-gray-800">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search messages..."
-                  className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-[#1A1A1A] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#F5C518] transition-colors"
-                />
+                <input type="text" placeholder="Search messages..." className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-[#1A1A1A] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#F5C518] transition-colors" />
               </div>
             </div>
             <div className="overflow-y-auto flex-1">
@@ -131,14 +163,13 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
                 <button
                   key={chat.id}
                   onClick={() => setSelectedChat(chat)}
-                  className={`w-full p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] transition-colors ${selectedChat?.id === chat.id ? 'bg-[#F5C518]/10 dark:bg-[#F5C518]/20 border-l-4 border-[#F5C518]' : ''
-                    }`}
+                  className={`w-full p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] transition-colors ${selectedChat?.id === chat.id ? 'bg-[#F5C518]/10 dark:bg-[#F5C518]/20 border-l-4 border-[#F5C518]' : ''}`}
                 >
-                  <div className="w-12 h-12 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold shadow-sm">
+                  <div className="w-12 h-12 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold shadow-sm flex-shrink-0">
                     {chat.full_name ? chat.full_name.substring(0, 2).toUpperCase() : 'U'}
                   </div>
                   <div className="flex-1 min-w-0 text-left">
-                    <p className="font-semibold text-[#1A1A1A] dark:text-white line-clamp-1">{chat.full_name || 'Unknown User'}</p>
+                    <p className="font-semibold text-[#1A1A1A] dark:text-white truncate">{chat.full_name || 'Unknown User'}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate capitalize">{chat.role}</p>
                   </div>
                 </button>
@@ -151,39 +182,58 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
             {selectedChat ? (
               <>
                 {/* Chat Header */}
-                <div className="p-4 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 shadow-sm z-10">
+                <div className="p-4 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 shadow-sm">
                   <div className="w-10 h-10 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold">
                     {selectedChat.full_name ? selectedChat.full_name.substring(0, 2).toUpperCase() : 'U'}
                   </div>
                   <div>
                     <p className="font-semibold text-[#1A1A1A] dark:text-white">{selectedChat.full_name || 'Unknown User'}</p>
-                    <p className="text-xs text-green-500 dark:text-green-400">Online</p>
+                    <p className="text-xs text-green-500">Online</p>
                   </div>
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((msg) => {
-                    const isMe = msg.sender_id === currentUserId;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[70%] px-4 py-2 rounded-2xl ${isMe
-                            ? 'bg-[#F5C518] text-[#1A1A1A] rounded-br-none'
-                            : 'bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800'
-                            }`}
-                        >
-                          <p>{msg.content}</p>
-                          <p className={`text-xs mt-1 text-right ${isMe ? 'text-[#1A1A1A]/60' : 'text-gray-400 dark:text-gray-500'}`}>
-                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                  {groupedMessages.map((group) => (
+                    <div key={group.label}>
+                      {/* Date Separator */}
+                      <div className="flex items-center gap-3 my-4">
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                        <span className="text-xs text-gray-400 dark:text-gray-500 font-medium px-2 py-1 bg-gray-100 dark:bg-[#2D2D2D] rounded-full">{group.label}</span>
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                       </div>
-                    )
-                  })}
+                      {group.msgs.map((msg) => {
+                        const isMe = msg.sender_id === currentUserId;
+                        const isDeleting = deletingId === msg.id;
+                        return (
+                          <div
+                            key={msg.id}
+                            className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+                            onMouseEnter={() => setHoveredId(msg.id)}
+                            onMouseLeave={() => setHoveredId(null)}
+                          >
+                            {/* Delete button — only for own messages, shows on hover */}
+                            {isMe && (
+                              <button
+                                onClick={() => handleDelete(msg.id)}
+                                disabled={isDeleting}
+                                className={`p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all ${hoveredId === msg.id ? 'opacity-100' : 'opacity-0'} ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                title="Delete message"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${isMe ? 'bg-[#F5C518] text-[#1A1A1A] rounded-br-none' : 'bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800'}`}>
+                              <p className="leading-relaxed">{msg.content}</p>
+                              <p className={`text-xs mt-1 ${isMe ? 'text-[#1A1A1A]/50 text-right' : 'text-gray-400 dark:text-gray-500'}`}>
+                                {formatMessageTime(msg.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
                   <div ref={messagesEndRef} />
                 </div>
 
@@ -207,7 +257,7 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
             ) : (
               <div className="flex-1 flex items-center justify-center h-full">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-white dark:bg-[#2D2D2D] rounded-full flex items-center justify-center mx-auto mb-4 card-shadow border border-transparent dark:border-gray-800">
+                  <div className="w-20 h-20 bg-white dark:bg-[#2D2D2D] rounded-full flex items-center justify-center mx-auto mb-4 shadow border border-gray-100 dark:border-gray-800">
                     <MessageSquare className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                   </div>
                   <p className="text-gray-500 dark:text-gray-400">Select a chat to start messaging</p>
