@@ -148,7 +148,7 @@ export function StudentSchedule({ onNavigate, onLogout }: StudentScheduleProps) 
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <StudentSidebar activeView="student-schedule" onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="flex-1 lg:ml-64">
+      <main className="flex-1 ml-64">
         {/* Header */}
         <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
           <div className="flex items-center justify-between">

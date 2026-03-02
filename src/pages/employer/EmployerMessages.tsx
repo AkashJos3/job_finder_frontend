@@ -46,7 +46,7 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
 
   const fetchConversations = async (token: string) => {
     try {
-      const res = await fetch(`${API_URL}/api / messages / conversations`, {
+      const res = await fetch(`${API_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -81,7 +81,7 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { setSendError('Please log in again.'); setSending(false); return; }
-      const res = await fetch(`${API_URL}/api / messages`, {
+      const res = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
       <EmployerSidebar activeView="employer-messages" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 ml-64 flex flex-col min-h-screen">
         {/* Header */}
         <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
           <div className="flex items-center gap-4">

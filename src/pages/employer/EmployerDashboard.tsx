@@ -119,7 +119,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <EmployerSidebar activeView="employer-dashboard" onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 ml-64 flex flex-col min-h-screen">
         {/* Header */}
         <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-8 py-4">
           <div className="flex items-center justify-between">

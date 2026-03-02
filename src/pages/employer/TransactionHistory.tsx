@@ -43,7 +43,7 @@ export function TransactionHistory({ onNavigate, onLogout }: TransactionHistoryP
       <EmployerSidebar activeView="employer-dashboard" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64">
+      <main className="flex-1 ml-64">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4">
           <div className="flex items-center justify-between">

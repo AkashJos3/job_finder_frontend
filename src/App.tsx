@@ -85,6 +85,7 @@ function App() {
   const [currentView, setCurrentView] = useState<PageView>('landing');
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [userRole, setUserRole] = useState<UserRole>('guest');
+  const [authLoading, setAuthLoading] = useState(true);
   const roleRef = useRef<UserRole>(userRole);
   const viewRef = useRef<PageView>(currentView);
   const [history, setHistory] = useState<PageView[]>(['landing']);
@@ -207,14 +208,16 @@ function App() {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }: any) => {
       if (session) {
-        fetchUserProfile(session.user.id, session.user);
+        fetchUserProfile(session.user.id).finally(() => setAuthLoading(false));
+      } else {
+        setAuthLoading(false);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event: string, session: any) => {
         if (session) {
-          fetchUserProfile(session.user.id, session.user);
+          fetchUserProfile(session.user.id);
         } else {
           handleLogoutLocal();
         }
@@ -224,31 +227,10 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string, authUser?: any) => {
+  const fetchUserProfile = async (userId: string) => {
     const { data } = await supabase.from('profiles').select('role').eq('id', userId).single();
 
-    // Intercept brand new OAuth logins without a profile. 
-    // We strictly check for Google provider to avoid accidentally creating profiles for ghost users or old OTP links.
-    if (!data && authUser && authUser.app_metadata?.provider === 'google') {
-      const pendingRole = localStorage.getItem('pendingRole') || 'student';
-      const fullName = authUser.user_metadata?.full_name || 'New User';
-
-      await supabase.from('profiles').insert({
-        id: userId,
-        role: pendingRole,
-        full_name: fullName
-      });
-
-      localStorage.removeItem('pendingRole');
-
-      setUserRole(pendingRole as UserRole);
-      const current = viewRef.current;
-      if (current === 'landing' || current === 'login' || current === 'signup' || current === 'employer-signup' || current === 'student-signup') {
-        handleLoginNavigation(pendingRole as UserRole);
-      }
-      return;
-    } else if (!data) {
-      // Profile missing but not google — old OTP link or ghost access
+    if (!data) {
       showGlobalToast('Profile not found. Please complete sign-up first.', 'error');
       await supabase.auth.signOut();
       handleLogoutLocal();
@@ -395,15 +377,31 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-white transition-colors duration-200">
-          {/* Global System Toast */}
-          {globalToast && (
-            <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3.5 rounded-xl shadow-2xl text-white font-semibold text-sm flex items-center gap-3 ${globalToast.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-              }`}>
-              <span>{globalToast.msg}</span>
-              <button onClick={() => setGlobalToast(null)} className="opacity-70 hover:opacity-100 text-lg leading-none">×</button>
+          {/* Auth Loading Spinner — prevents white screen on first load */}
+          {authLoading ? (
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 bg-[#F5C518] rounded-xl flex items-center justify-center animate-pulse">
+                  <svg className="w-6 h-6 text-[#1A1A1A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 font-medium">Loading AfterBell...</p>
+              </div>
             </div>
+          ) : (
+            <>
+              {/* Global System Toast */}
+              {globalToast && (
+                <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3.5 rounded-xl shadow-2xl text-white font-semibold text-sm flex items-center gap-3 ${globalToast.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                  }`}>
+                  <span>{globalToast.msg}</span>
+                  <button onClick={() => setGlobalToast(null)} className="opacity-70 hover:opacity-100 text-lg leading-none">×</button>
+                </div>
+              )}
+              {renderPage()}
+            </>
           )}
-          {renderPage()}
         </div>
       </ThemeProvider>
     </ErrorBoundary>
