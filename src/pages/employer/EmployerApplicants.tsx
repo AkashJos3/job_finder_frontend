@@ -41,19 +41,22 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
         const json = await res.json();
         const apps = json.data || [];
         setAppsData(apps);
+        setLoading(false); // Show cards immediately — don't block on ratings
 
-        // Fetch ratings for these students
-        const studentIds = Array.from(new Set(apps.map((a: any) => a.student_id)));
+        // Fetch ALL ratings in parallel (was sequential before)
+        const studentIds = Array.from(new Set(apps.map((a: any) => a.student_id))) as string[];
+        const results = await Promise.all(
+          studentIds.map(sid =>
+            fetch(`${API_URL}/api/reviews/student/${sid}`, {
+              headers: { Authorization: `Bearer ${session.access_token}` }
+            })
+              .then(r => r.ok ? r.json() : { average: 0 })
+              .then(data => ({ sid, avg: data.average || 0 }))
+              .catch(() => ({ sid, avg: 0 }))
+          )
+        );
         const ratingsMap: Record<string, number> = {};
-        for (const sid of studentIds) {
-          const r_res = await fetch(`${API_URL}/api/reviews/student/${sid}`, {
-            headers: { Authorization: `Bearer ${session.access_token}` }
-          });
-          if (r_res.ok) {
-            const r_json = await r_res.json();
-            ratingsMap[sid as string] = r_json.average || 0;
-          }
-        }
+        results.forEach(({ sid, avg }) => { ratingsMap[sid] = avg; });
         setStudentRatings(ratingsMap);
       }
     } catch (e) {
@@ -62,6 +65,7 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
       setLoading(false);
     }
   };
+
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all');
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from './lib/supabaseClient';
+import { keepBackendAlive } from './lib/api';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LandingPage } from './pages/LandingPage';
@@ -102,6 +103,11 @@ function App() {
     roleRef.current = userRole;
     viewRef.current = currentView;
   }, [userRole, currentView]);
+
+  // Prevent Render backend from sleeping
+  useEffect(() => {
+    keepBackendAlive();
+  }, []);
 
   // Sync with browser history
   useEffect(() => {
