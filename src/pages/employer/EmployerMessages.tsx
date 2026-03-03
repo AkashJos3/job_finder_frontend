@@ -8,7 +8,7 @@ import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
 interface EmployerMessagesProps {
   onNavigate: (view: PageView) => void;
   onLogout: () => void;
-  initialChat?: { id: string; full_name: string; };
+  initialChat?: { id: string; full_name: string; avatar_url?: string };
 }
 
 // Format timestamp: "Today 2:30 PM", "Yesterday 11:45 AM", or "Mar 2, 9:00 AM"
@@ -79,7 +79,14 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
       });
       if (res.ok) {
         const json = await res.json();
-        setConversations(json.data || []);
+        const convos = json.data || [];
+        setConversations(convos);
+        // Enrich selectedChat with avatar_url once conversations load
+        setSelectedChat((prev: any) => {
+          if (!prev) return prev;
+          const match = convos.find((c: any) => c.id === prev.id);
+          return match ? { ...prev, avatar_url: match.avatar_url } : prev;
+        });
       }
     } catch (e) { console.error(e); }
   };
