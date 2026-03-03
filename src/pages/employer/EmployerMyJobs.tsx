@@ -146,7 +146,11 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
   const filteredJobs = myJobs.filter(job => {
     const matchesSearch = (job.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (job.location || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || job.status?.toLowerCase() === filterStatus;
+    const isPaused = job.status === 'closed' || job.status === 'paused';
+    const matchesStatus =
+      filterStatus === 'all' ||
+      (filterStatus === 'open' && job.status === 'open') ||
+      (filterStatus === 'paused' && isPaused);
     return matchesSearch && matchesStatus;
   });
 
@@ -174,8 +178,11 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
             </button>
             <div className="flex items-start justify-between mb-4">
               <h2 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">{viewJob.title}</h2>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${viewJob.status === 'open' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'}`}>
-                {viewJob.status}
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${viewJob.status === 'open'
+                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                  : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                }`}>
+                {viewJob.status === 'open' ? 'OPEN' : 'PAUSED'}
               </span>
             </div>
             <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300 mb-6">
@@ -377,7 +384,6 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
                 <option value="all">All Status</option>
                 <option value="open">Open</option>
                 <option value="paused">Paused</option>
-                <option value="closed">Closed</option>
               </select>
             </div>
           </div>
