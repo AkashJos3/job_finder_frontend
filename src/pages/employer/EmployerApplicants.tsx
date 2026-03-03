@@ -236,9 +236,6 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
                   }`}
               >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
-                <span className="ml-1.5 opacity-70">
-                  ({s === 'all' ? totalCandidates : s === 'pending' ? needsReview : s === 'accepted' ? shortlisted : rejected})
-                </span>
               </button>
             ))}
           </div>
