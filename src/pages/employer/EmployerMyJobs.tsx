@@ -28,6 +28,12 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     fetchJobs();
@@ -70,17 +76,31 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
 
   const handleToggleStatus = async (jobId: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'open' ? 'paused' : 'open';
+    // Optimistically update UI immediately
+    setMyJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus } : j));
+    setTogglingIds(prev => new Set(prev).add(jobId));
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      await fetch(`${API_URL}/api/jobs/${jobId}`, {
+      if (!session) { showToast('Not logged in', 'error'); return; }
+      const res = await fetch(`${API_URL}/api/jobs/${jobId}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus })
       });
-      fetchJobs();
+      if (res.ok) {
+        showToast(nextStatus === 'paused' ? 'Job paused successfully' : 'Job re-opened successfully', 'success');
+      } else {
+        const err = await res.json();
+        // Revert optimistic update on failure
+        setMyJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: currentStatus } : j));
+        showToast(err.error || 'Failed to update job status', 'error');
+      }
     } catch (e) {
-      console.error(e);
+      // Revert on network error
+      setMyJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: currentStatus } : j));
+      showToast('Network error — please try again', 'error');
+    } finally {
+      setTogglingIds(prev => { const s = new Set(prev); s.delete(jobId); return s; });
     }
   };
 
@@ -136,6 +156,14 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <EmployerSidebar activeView="employer-myjobs" onNavigate={onNavigate} onLogout={onLogout} />
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[999] px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm transition-all duration-300 ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}>
+          {toast.msg}
+        </div>
+      )}
 
       {/* ── VIEW MODAL ── */}
       {viewJob && (
@@ -430,14 +458,19 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
                         {/* Pause / Resume toggle */}
                         <button
                           onClick={() => handleToggleStatus(job.id, job.status)}
+                          disabled={togglingIds.has(job.id)}
                           title={job.status === 'open' ? 'Pause Job' : 'Re-open Job'}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors border border-transparent ${job.status === 'open'
-                            ? 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 dark:border-orange-900/50'
-                            : 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 dark:border-green-900/50'}`}
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors border border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${job.status === 'open'
+                              ? 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 dark:border-orange-900/50'
+                              : 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 dark:border-green-900/50'
+                            }`}
                         >
-                          <span className={`text-[10px] font-bold tracking-wide ${job.status === 'open' ? 'text-orange-600 dark:text-orange-500' : 'text-green-600 dark:text-green-500'}`}>
-                            {job.status === 'open' ? 'PAUSE' : 'OPEN'}
-                          </span>
+                          {togglingIds.has(job.id)
+                            ? <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                            : <span className={`text-[10px] font-bold tracking-wide ${job.status === 'open' ? 'text-orange-600 dark:text-orange-500' : 'text-green-600 dark:text-green-500'}`}>
+                              {job.status === 'open' ? 'PAUSE' : 'OPEN'}
+                            </span>
+                          }
                         </button>
                         {/* Delete button */}
                         <button
