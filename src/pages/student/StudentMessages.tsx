@@ -167,9 +167,10 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
                   onClick={() => handleSelectChat(chat)}
                   className={`w-full p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] transition-colors ${selectedChat?.id === chat.id ? 'bg-[#F5C518]/10 dark:bg-[#F5C518]/20 border-l-4 border-[#F5C518]' : ''}`}
                 >
-                  <div className="w-12 h-12 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold shadow-sm flex-shrink-0">
-                    {chat.full_name ? chat.full_name.substring(0, 2).toUpperCase() : 'U'}
-                  </div>
+                  {chat.avatar_url
+                    ? <img src={chat.avatar_url} alt={chat.full_name} className="w-12 h-12 rounded-full object-cover flex-shrink-0 shadow-sm" />
+                    : <div className="w-12 h-12 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold flex-shrink-0">{chat.full_name ? chat.full_name.substring(0, 2).toUpperCase() : 'U'}</div>
+                  }
                   <div className="flex-1 min-w-0 text-left">
                     <p className="font-semibold text-[#1A1A1A] dark:text-white truncate">{chat.full_name || 'Unknown User'}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate capitalize">{chat.role}</p>
@@ -188,9 +189,10 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
                   <button onClick={() => setShowChatOnMobile(false)} className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mr-1">
                     <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                   </button>
-                  <div className="w-10 h-10 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold flex-shrink-0">
-                    {selectedChat.full_name ? selectedChat.full_name.substring(0, 2).toUpperCase() : 'U'}
-                  </div>
+                  {selectedChat.avatar_url
+                    ? <img src={selectedChat.avatar_url} alt={selectedChat.full_name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                    : <div className="w-10 h-10 bg-[#1A1A1A] dark:bg-white rounded-full flex items-center justify-center text-white dark:text-[#1A1A1A] font-bold flex-shrink-0">{selectedChat.full_name ? selectedChat.full_name.substring(0, 2).toUpperCase() : 'U'}</div>
+                  }
                   <div>
                     <p className="font-semibold text-[#1A1A1A] dark:text-white">{selectedChat.full_name || 'Unknown User'}</p>
                   </div>
