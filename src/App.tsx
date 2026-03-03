@@ -149,7 +149,7 @@ function App() {
           return;
         }
 
-        if (currentRole === 'admin' && (view.includes('student') || view.includes('employer-'))) {
+        if (currentRole === 'admin' && (view.includes('student') || view.includes('employer-')) && !view.startsWith('admin-')) {
           // Admins have wide access, but let's keep them out of student/employer specific workflows
           showGlobalToast('Admins should use the Admin Dashboard.', 'info');
           window.history.pushState({ view: 'admin-dashboard', index: event.state.index }, '');
@@ -184,7 +184,7 @@ function App() {
       return;
     }
 
-    if (currentRole === 'admin' && (view.includes('student') || view.includes('employer-'))) {
+    if (currentRole === 'admin' && (view.includes('student') || view.includes('employer-')) && !view.startsWith('admin-')) {
       showGlobalToast('Admins should use the Admin Dashboard.', 'info');
       view = 'admin-dashboard';
     }
