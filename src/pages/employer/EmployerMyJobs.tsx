@@ -75,7 +75,7 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
   };
 
   const handleToggleStatus = async (jobId: string, currentStatus: string) => {
-    const nextStatus = currentStatus === 'open' ? 'paused' : 'open';
+    const nextStatus = currentStatus === 'open' ? 'closed' : 'open';
     // Optimistically update UI immediately
     setMyJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus } : j));
     setTogglingIds(prev => new Set(prev).add(jobId));
@@ -88,7 +88,7 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
         body: JSON.stringify({ status: nextStatus })
       });
       if (res.ok) {
-        showToast(nextStatus === 'paused' ? 'Job paused successfully' : 'Job re-opened successfully', 'success');
+        showToast(nextStatus !== 'open' ? 'Job paused successfully' : 'Job re-opened successfully', 'success');
       } else {
         const err = await res.json();
         // Revert optimistic update on failure
@@ -461,8 +461,8 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
                           disabled={togglingIds.has(job.id)}
                           title={job.status === 'open' ? 'Pause Job' : 'Re-open Job'}
                           className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors border border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${job.status === 'open'
-                              ? 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 dark:border-orange-900/50'
-                              : 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 dark:border-green-900/50'
+                            ? 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 dark:border-orange-900/50'
+                            : 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 dark:border-green-900/50'
                             }`}
                         >
                           {togglingIds.has(job.id)
