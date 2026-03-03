@@ -1,7 +1,7 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, Search,
+  Search,
   Bookmark, Navigation, Trash2, ExternalLink
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ interface StudentSavedJobsProps {
 export function StudentSavedJobs({ onNavigate, onLogout }: StudentSavedJobsProps) {
   const [savedJobs, setSavedJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchSavedJobs();
@@ -59,6 +60,14 @@ export function StudentSavedJobs({ onNavigate, onLogout }: StudentSavedJobsProps
     }
   };
 
+  const filteredJobs = savedJobs.filter(job => {
+    const q = searchQuery.toLowerCase();
+    return !q ||
+      (job.jobs?.title || '').toLowerCase().includes(q) ||
+      (job.jobs?.company_name || '').toLowerCase().includes(q) ||
+      (job.jobs?.location || '').toLowerCase().includes(q);
+  });
+
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <StudentSidebar activeView="student-saved" onNavigate={onNavigate} onLogout={onLogout} />
@@ -96,16 +105,11 @@ export function StudentSavedJobs({ onNavigate, onLogout }: StudentSavedJobsProps
                 <input
                   type="text"
                   placeholder="Search saved jobs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] w-48 transition-colors duration-200"
                 />
               </div>
-              <button
-                onClick={() => onNavigate('student-dashboard')}
-                className="w-10 h-10 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative"
-                title="Notifications"
-              >
-                <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
             </div>
           </div>
         </header>
@@ -114,9 +118,9 @@ export function StudentSavedJobs({ onNavigate, onLogout }: StudentSavedJobsProps
         <div className="p-8 flex-1">
           {loading ? (
             <div className="text-center py-20 text-gray-500 dark:text-gray-400">Loading saved jobs...</div>
-          ) : savedJobs.length > 0 ? (
+          ) : filteredJobs.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedJobs.map((job) => (
+              {filteredJobs.map((job) => (
                 <div key={job.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-300 flex flex-col justify-between border border-transparent dark:border-gray-800">
                   <div>
                     <div className="flex items-start justify-between mb-4">
@@ -166,14 +170,15 @@ export function StudentSavedJobs({ onNavigate, onLogout }: StudentSavedJobsProps
               <div className="w-20 h-20 bg-gray-100 dark:bg-[#1A1A1A] rounded-full flex items-center justify-center mx-auto mb-6 border border-transparent dark:border-gray-800">
                 <Bookmark className="w-10 h-10 text-gray-400 dark:text-gray-500" />
               </div>
-              <h3 className="text-xl font-bold text-[#1A1A1A] dark:text-white mb-2">No saved jobs yet</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">Start browsing and save jobs you're interested in</p>
-              <button
-                onClick={() => onNavigate('student-jobs')}
-                className="btn-primary"
-              >
-                Browse Jobs
-              </button>
+              <h3 className="text-xl font-bold text-[#1A1A1A] dark:text-white mb-2">
+                {searchQuery ? 'No results found' : 'No saved jobs yet'}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                {searchQuery ? `No saved jobs match "${searchQuery}"` : 'Start browsing and save jobs you\'re interested in'}
+              </p>
+              {!searchQuery && (
+                <button onClick={() => onNavigate('student-jobs')} className="btn-primary">Browse Jobs</button>
+              )}
             </div>
           )}
         </div>
