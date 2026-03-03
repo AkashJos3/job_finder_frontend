@@ -21,7 +21,7 @@ export default defineConfig({
         name: 'AfterBell',
         short_name: 'AfterBell',
         description: 'Find local part-time jobs near your college. Safe, simple, student-first.',
-        theme_color: '#F5C518',
+        theme_color: '#1A1A1A',
         background_color: '#FFFBF0',
         display: 'standalone',
         start_url: '/',

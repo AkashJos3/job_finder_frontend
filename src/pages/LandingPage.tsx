@@ -1,45 +1,14 @@
 import type { PageView } from '../App';
-import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2, Smartphone } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface LandingPageProps {
   onNavigate: (view: PageView) => void;
 }
 
 export function LandingPage({ onNavigate }: LandingPageProps) {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    // Listen for the beforeinstallprompt event to show the install button
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(e);
-      console.log("'beforeinstallprompt' event was fired.");
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    // Show the install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-
-    // We've used the prompt, and can't use it again, throw it away
-    setDeferredPrompt(null);
-  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   return (
     <div className="min-h-screen bg-[#FFFBF0]">
@@ -141,82 +110,75 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="absolute inset-0 bg-black/70"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full mb-6">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              <span className="text-sm font-medium text-gray-300">New jobs added daily in your locality</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-300">New jobs added daily in your locality</span>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
               Find Local <span className="text-[#F5C518]">Part-Time</span> Jobs
             </h1>
 
             {/* Subheading */}
-            <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-8 max-w-2xl mx-auto px-2">
               Connecting students with trusted nearby part-time work after college hours.
               Safe, simple, and student-first.
             </p>
 
-            {/* Search Bar */}
-            <div className="flex items-center bg-black/40 backdrop-blur-md border border-white/20 rounded-full p-2 max-w-xl mx-auto mb-8 focus-within:ring-2 focus-within:ring-[#F5C518]/50 transition-all shadow-lg">
-              <div className="flex-1 flex items-center pl-4">
-                <Search className="w-5 h-5 text-gray-300 mr-3 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Role, city, or keywords..."
-                  className="bg-transparent border-none text-white placeholder-gray-400 w-full focus:outline-none text-base"
-                />
-              </div>
-              {deferredPrompt && (
+            {/* Search Bar — stacked on mobile, row on sm+ */}
+            <div className="max-w-xl mx-auto mb-8 px-2">
+              <div className="flex flex-col sm:flex-row gap-2 bg-black/40 backdrop-blur-md border border-white/20 rounded-2xl sm:rounded-full p-2 focus-within:ring-2 focus-within:ring-[#F5C518]/50 transition-all shadow-lg">
+                <div className="flex items-center pl-3 flex-1">
+                  <Search className="w-5 h-5 text-gray-300 mr-2 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Role, city, or keywords..."
+                    className="bg-transparent border-none text-white placeholder-gray-400 w-full focus:outline-none text-sm sm:text-base py-2"
+                  />
+                </div>
                 <button
-                  onClick={handleInstallClick}
-                  className="bg-white text-[#1A1A1A] font-bold px-6 py-3 rounded-full hover:bg-gray-100 transition-all flex items-center gap-2 whitespace-nowrap ml-2 shadow-md"
+                  onClick={() => onNavigate('login')}
+                  className="bg-[#F5C518] text-[#1A1A1A] font-bold px-5 py-3 rounded-xl sm:rounded-full hover:bg-[#E5B508] transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-md"
                 >
-                  <Smartphone className="w-5 h-5" />
-                  Install App
+                  <User className="w-4 h-4" />
+                  Find Jobs
+                  <ChevronRight className="w-4 h-4" />
                 </button>
-              )}
-              <button
-                onClick={() => onNavigate('login')}
-                className="bg-[#F5C518] text-[#1A1A1A] font-bold px-6 py-3 rounded-full hover:bg-[#E5B508] transition-all flex items-center gap-2 whitespace-nowrap ml-2 shadow-md"
-              >
-                <User className="w-4 h-4" />
-                Find Jobs
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              </div>
             </div>
 
             {/* Quick Tags */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <span className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-sm text-gray-200 shadow-sm">
-                <Shield className="w-4 h-4 text-green-400" />
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10 px-2">
+              <span className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs sm:text-sm text-gray-200 shadow-sm">
+                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
                 Verified Indian Employers
               </span>
-              <span className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-sm text-gray-200 shadow-sm">
-                <Clock className="w-4 h-4 text-[#F5C518]" />
+              <span className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs sm:text-sm text-gray-200 shadow-sm">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F5C518]" />
                 Flexible Hours
               </span>
-              <span className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-sm text-gray-200 shadow-sm">
-                <MapPin className="w-4 h-4 text-blue-400" />
+              <span className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs sm:text-sm text-gray-200 shadow-sm">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
                 Location Based Search
               </span>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
               <button
                 onClick={() => onNavigate('student-signup')}
-                className="bg-[#F5C518] text-[#1A1A1A] font-bold text-lg px-8 py-4 rounded-xl hover:bg-[#E5B508] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                className="bg-[#F5C518] text-[#1A1A1A] font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-[#E5B508] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
                 <User className="w-5 h-5" />
                 Find Jobs
               </button>
               <button
                 onClick={() => onNavigate('employer-signup')}
-                className="bg-white text-[#1A1A1A] font-bold text-lg px-8 py-4 rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                className="bg-white text-[#1A1A1A] font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
                 <Building2 className="w-5 h-5" />
                 Post a Job
@@ -500,7 +462,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
       {/* Footer */}
       <footer className="bg-[#1A1A1A] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-12">
             {/* Brand */}
             <div>
               <button
