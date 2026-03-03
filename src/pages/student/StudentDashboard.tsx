@@ -85,15 +85,21 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
           .select('full_name, latitude, longitude, avatar_url')
           .eq('id', session.user.id)
           .single()
-          .then(({ data }) => {
-            if (data && data.full_name) {
+          .then(({ data, error }) => {
+            if (error || !data) {
+              console.error('Failed to fetch user profile for location:', error?.message);
+              // Fallback: fetch jobs without distance sorting so the dashboard unblocks
+              fetchJobs(session.access_token);
+              return;
+            }
+            if (data.full_name) {
               setUserName(data.full_name);
               setUserInitials(data.full_name.charAt(0).toUpperCase());
             }
-            if (data && data.avatar_url) {
+            if (data.avatar_url) {
               setAvatarUrl(data.avatar_url);
             }
-            if (data && data.latitude && data.longitude) {
+            if (data.latitude && data.longitude) {
               setUserLocation({ lat: data.latitude, lng: data.longitude });
               fetchJobs(session.access_token, data.latitude, data.longitude);
             } else {
