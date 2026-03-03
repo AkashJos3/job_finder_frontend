@@ -104,15 +104,6 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => onNavigate('student-dashboard')}
-                className="w-10 h-10 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative"
-                title="Notifications"
-              >
-                <span className="w-5 h-5 text-gray-600 dark:text-gray-400">??</span>
-              </button>
-            </div>
           </div>
         </header>
 
@@ -177,6 +168,13 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                       <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{companyName}</p>
                     </div>
                   </div>
+
+                  {/* Job Paused Banner */}
+                  {(jobDetails.status === 'closed' || jobDetails.status === 'paused') && (
+                    <div className="mb-2 flex items-center gap-1.5 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-semibold">
+                      ⏸ This job is currently paused by the employer
+                    </div>
+                  )}
 
                   <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ${statusColor}`}>
                     {statusLabel}
@@ -305,6 +303,12 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
               {selectedApp.status === 'pending' && (
                 <div className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 p-4 rounded-xl text-sm mt-4">
                   Your application is currently being reviewed by the employer. You will be notified once a decision is made.
+                </div>
+              )}
+              {(selectedApp.jobs?.status === 'closed' || selectedApp.jobs?.status === 'paused') && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 p-4 rounded-xl text-sm mt-4 flex items-start gap-2">
+                  <span className="text-lg">⏸</span>
+                  <span><strong>Job Paused:</strong> The employer has temporarily paused this job listing. Your application is still saved and will be reviewed when the job reopens.</span>
                 </div>
               )}
             </div>
