@@ -17,6 +17,7 @@ export function EmployerProfile({ onNavigate, onLogout }: EmployerProfileProps) 
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveMsg, setSaveMsg] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [activeJobsCount, setActiveJobsCount] = useState(0);
   const [memberSince, setMemberSince] = useState('');
   const [totalHires, setTotalHires] = useState(0);
@@ -114,17 +115,56 @@ export function EmployerProfile({ onNavigate, onLogout }: EmployerProfileProps) 
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!isEditing) setIsEditing(true);
+    if (!file.type.startsWith('image/')) {
+      setSaveMsg('❌ Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setSaveMsg('❌ Image must be smaller than 5MB');
+      return;
+    }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfileData(prev => ({ ...prev, avatar_url: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingPhoto(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const userId = session.user.id;
+      const ext = file.name.split('.').pop();
+      const filePath = `${userId}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const urlWithBust = `${publicUrl}?t=${Date.now()}`;
+
+      await fetch(`${API_URL}/api/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ avatar_url: publicUrl })
+      });
+
+      setProfileData(prev => ({ ...prev, avatar_url: urlWithBust }));
+      setSaveMsg('✅ Profile photo updated!');
+      setTimeout(() => setSaveMsg(''), 3000);
+    } catch (err: any) {
+      console.error('Avatar upload failed:', err);
+      setSaveMsg('❌ ' + (err?.message || 'Failed to upload. Check Supabase Storage avatars bucket.'));
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
   };
 
   const stats = [
@@ -169,7 +209,7 @@ export function EmployerProfile({ onNavigate, onLogout }: EmployerProfileProps) 
           <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl p-8 card-shadow mb-8">
             <div className="flex flex-col md:flex-row items-center gap-8">
               {/* Avatar */}
-              <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-upload')?.click()}>
+              <div className="relative group cursor-pointer" onClick={() => !isUploadingPhoto && document.getElementById('avatar-upload')?.click()}>
                 {profileData.avatar_url ? (
                   <img src={profileData.avatar_url} alt="Profile" className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-[#1A1A1A] shadow-md" />
                 ) : (
@@ -177,8 +217,10 @@ export function EmployerProfile({ onNavigate, onLogout }: EmployerProfileProps) 
                     {profileData.full_name ? profileData.full_name.substring(0, 1).toUpperCase() : 'B'}
                   </div>
                 )}
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#F5C518] rounded-full flex items-center justify-center shadow-lg hover:bg-[#E5B508] transition-colors">
-                  <Camera className="w-5 h-5 text-[#1A1A1A]" />
+                <div className={`absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-colors ${isUploadingPhoto ? 'bg-gray-300' : 'bg-[#F5C518] hover:bg-[#E5B508]'}`}>
+                  {isUploadingPhoto
+                    ? <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                    : <Camera className="w-5 h-5 text-[#1A1A1A]" />}
                 </div>
                 <input
                   type="file"

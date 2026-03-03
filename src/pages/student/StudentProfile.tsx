@@ -15,6 +15,7 @@ interface StudentProfileProps {
 export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const showToast = useCallback((msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -111,17 +112,61 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!isEditing) setIsEditing(true);
+    // Validate file type and size (max 5MB)
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select an image file', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be smaller than 5MB', 'error');
+      return;
+    }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfileData(prev => ({ ...prev, avatar_url: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingPhoto(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { showToast('Not logged in', 'error'); return; }
+
+      const userId = session.user.id;
+      const ext = file.name.split('.').pop();
+      const filePath = `${userId}/avatar.${ext}`;
+
+      // Upload to Supabase Storage bucket 'avatars'
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Add cache-busting param so browser re-fetches freshly uploaded image
+      const urlWithBust = `${publicUrl}?t=${Date.now()}`;
+
+      // Save the URL to the profile immediately
+      await fetch(`${API_URL}/api/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ avatar_url: publicUrl })
+      });
+
+      setProfileData(prev => ({ ...prev, avatar_url: urlWithBust }));
+      showToast('Profile photo updated!', 'success');
+    } catch (err: any) {
+      console.error('Avatar upload failed:', err);
+      showToast(err?.message || 'Failed to upload photo. Make sure the avatars bucket exists in Supabase Storage.', 'error');
+    } finally {
+      setIsUploadingPhoto(false);
+      // Reset input so same file can be re-selected
+      e.target.value = '';
+    }
   };
 
   const stats = [
@@ -170,7 +215,7 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
           <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-8 card-shadow border border-transparent dark:border-gray-800 mb-8">
             <div className="flex flex-col md:flex-row items-center gap-8">
               {/* Avatar */}
-              <div className="relative group cursor-pointer" onClick={() => document.getElementById('student-avatar-upload')?.click()}>
+              <div className="relative group cursor-pointer" onClick={() => !isUploadingPhoto && document.getElementById('student-avatar-upload')?.click()}>
                 {profileData.avatar_url ? (
                   <img src={profileData.avatar_url} alt="Profile" className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-[#1A1A1A] shadow-md" />
                 ) : (
@@ -178,8 +223,10 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
                     {profileData.full_name ? profileData.full_name.substring(0, 2).toUpperCase() : 'ST'}
                   </div>
                 )}
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#F5C518] rounded-full flex items-center justify-center shadow-lg hover:bg-[#E5B508] transition-colors">
-                  <Camera className="w-5 h-5 text-[#1A1A1A]" />
+                <div className={`absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-colors ${isUploadingPhoto ? 'bg-gray-300' : 'bg-[#F5C518] hover:bg-[#E5B508]'}`}>
+                  {isUploadingPhoto
+                    ? <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                    : <Camera className="w-5 h-5 text-[#1A1A1A]" />}
                 </div>
                 <input
                   type="file"
