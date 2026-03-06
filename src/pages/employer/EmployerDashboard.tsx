@@ -124,8 +124,8 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
         <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Here&apos;s what&apos;s happening today.</p>
-              <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">
+              <p className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">Here&apos;s what&apos;s happening today.</p>
+              <h1 className="text-xl md:text-2xl font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
                 Welcome{userName ? `, ${userName.split(' ')[0]}` : ''}! <span className="text-[#F5C518]">👋</span>
               </h1>
             </div>

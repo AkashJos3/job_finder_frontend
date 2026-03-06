@@ -128,12 +128,12 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
           {/* Title */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-[#1A1A1A] mb-1">Dashboard Overview</h1>
-              <p className="text-gray-500">Platform activity summary for {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}.</p>
+              <h1 className="text-xl md:text-3xl font-bold text-[#1A1A1A] mb-1 line-clamp-1">Dashboard Overview</h1>
+              <p className="hidden sm:block text-gray-500">Platform activity summary for {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}.</p>
             </div>
-            <button onClick={handleDownloadReport} className="btn-dark flex items-center gap-2">
+            <button onClick={handleDownloadReport} className="btn-dark flex flex-shrink-0 items-center gap-2 text-sm px-3 md:px-4 py-2">
               <Download className="w-4 h-4" />
-              Download Report
+              <span className="hidden sm:inline">Download Report</span>
             </button>
           </div>
 

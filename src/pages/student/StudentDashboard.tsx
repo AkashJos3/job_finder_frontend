@@ -226,17 +226,17 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
 
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <p className="hidden md:block text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
                 </p>
-                <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">
+                <h1 className="text-xl md:text-2xl font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
                   Welcome, <span className="text-[#F5C518]">{userName || 'Student'}!</span>
                 </h1>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {/* Search Bar */}
-              <div className="relative flex-1 max-w-md">
+              {/* Search Bar - Hidden on small mobile */}
+              <div className="relative flex-1 max-w-md hidden sm:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
@@ -302,10 +302,11 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
               </button>
               <button
                 onClick={() => onNavigate('student-jobs')}
-                className="btn-dark flex items-center gap-2"
+                className="btn-dark flex items-center gap-2 px-3 md:px-4"
               >
                 <Search className="w-4 h-4" />
-                Find Nearby Jobs
+                <span className="hidden sm:inline">Find Nearby Jobs</span>
+                <span className="sm:hidden text-xs">Find Jobs</span>
               </button>
             </div>
           </div>
