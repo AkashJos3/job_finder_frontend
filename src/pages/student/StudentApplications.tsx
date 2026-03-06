@@ -42,9 +42,9 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
   };
 
   const applications = {
-    applied: appsData.filter(a => a.status === 'pending'),
-    accepted: appsData.filter(a => a.status === 'accepted' || a.status === 'approved'),
-    rejected: appsData.filter(a => a.status === 'rejected'),
+    applied: appsData.filter(a => ['pending', 'Pending'].includes(a.status)),
+    accepted: appsData.filter(a => ['accepted', 'Accepted', 'approved', 'Approved', 'Confirmed', 'Completed'].includes(a.status)),
+    rejected: appsData.filter(a => ['rejected', 'Rejected', 'Cancelled', 'No-show'].includes(a.status)),
   };
 
   const currentApplications = applications[activeTab];
@@ -55,17 +55,17 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
     let icon = '💼';
     let iconBg = 'bg-blue-100 dark:bg-blue-900/20';
 
-    if (app.status === 'pending') {
+    if (['pending', 'Pending'].includes(app.status)) {
       statusColor = 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400';
       statusLabel = 'Pending Review';
-    } else if (app.status === 'accepted' || app.status === 'approved') {
+    } else if (['accepted', 'Accepted', 'approved', 'Approved', 'Confirmed', 'Completed'].includes(app.status)) {
       statusColor = 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400';
-      statusLabel = 'Accepted';
+      statusLabel = app.status;
       iconBg = 'bg-green-100 dark:bg-green-900/40';
       icon = '🎉';
-    } else if (app.status === 'rejected') {
+    } else if (['rejected', 'Rejected', 'Cancelled', 'No-show'].includes(app.status)) {
       statusColor = 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400';
-      statusLabel = 'Rejected';
+      statusLabel = app.status;
       iconBg = 'bg-red-100 dark:bg-red-900/40';
       icon = '❌';
     }
@@ -164,8 +164,8 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-[#1A1A1A] dark:text-white truncate">{jobDetails.title || 'Unknown Job'}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{companyName}</p>
+                      <h3 className="font-semibold text-[#1A1A1A] dark:text-white break-words whitespace-pre-wrap">{jobDetails.title || 'Unknown Job'}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 break-words whitespace-pre-wrap">{companyName}</p>
                     </div>
                   </div>
 

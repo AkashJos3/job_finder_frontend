@@ -69,11 +69,11 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all');
 
-  const pendingApps = appsData.filter(a => a.status === 'pending');
+  const pendingApps = appsData.filter(a => ['pending', 'Pending'].includes(a.status));
   const totalCandidates = appsData.length;
   const needsReview = pendingApps.length;
-  const shortlisted = appsData.filter(a => a.status === 'accepted' || a.status === 'approved').length;
-  const rejected = appsData.filter(a => a.status === 'rejected').length;
+  const shortlisted = appsData.filter(a => ['accepted', 'Accepted', 'approved', 'Approved'].includes(a.status)).length;
+  const rejected = appsData.filter(a => ['rejected', 'Rejected'].includes(a.status)).length;
 
   const uniqueJobs = Array.from(new Set(appsData.map(a => a.jobs?.title))).filter(Boolean) as string[];
   const jobTabs = [
@@ -93,7 +93,12 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
 
   const displayedApps = appsData.filter(a => {
     const matchesJob = selectedJob === 'All Jobs' || a.jobs?.title === selectedJob;
-    const matchesStatus = statusFilter === 'all' || a.status === statusFilter || (statusFilter === 'accepted' && a.status === 'approved');
+    let matchesStatus = false;
+    if (statusFilter === 'all') matchesStatus = true;
+    else if (statusFilter === 'pending') matchesStatus = ['pending', 'Pending'].includes(a.status);
+    else if (statusFilter === 'accepted') matchesStatus = ['accepted', 'Accepted', 'approved', 'Approved'].includes(a.status);
+    else if (statusFilter === 'rejected') matchesStatus = ['rejected', 'Rejected'].includes(a.status);
+
     const matchesSearch = searchQuery === '' ||
       (a.profiles?.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (a.jobs?.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||

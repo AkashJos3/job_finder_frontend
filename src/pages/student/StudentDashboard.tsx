@@ -260,7 +260,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
 
                 {/* Notifications Dropdown */}
                 {showNotif && (
-                  <div className="absolute top-12 -right-2 sm:right-0 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white dark:bg-[#2D2D2D] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden">
+                  <div className="fixed top-20 left-4 right-4 sm:absolute sm:top-12 sm:inset-auto sm:right-0 w-auto sm:w-80 max-w-sm bg-white dark:bg-[#2D2D2D] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
                       <h3 className="font-bold text-[#1A1A1A] dark:text-white">Notifications</h3>
                       <span className="text-xs bg-[#F5C518] text-[#1A1A1A] px-2 py-1 rounded-full font-bold">
@@ -277,7 +277,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
                             onClick={() => !notif.is_read && markAsRead(notif.id)}
                             className={`p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer transition-colors ${notif.is_read ? 'bg-white dark:bg-[#2D2D2D] hover:bg-gray-50 dark:hover:bg-gray-800' : 'bg-[#FFFBF0] dark:bg-yellow-900/10 hover:bg-amber-50 dark:hover:bg-yellow-900/20'}`}
                           >
-                            <p className={`text-sm ${notif.is_read ? 'text-gray-600 dark:text-gray-400' : 'text-[#1A1A1A] dark:text-white font-medium'}`}>
+                            <p className={`text-sm break-words whitespace-pre-wrap ${notif.is_read ? 'text-gray-600 dark:text-gray-400' : 'text-[#1A1A1A] dark:text-white font-medium'}`}>
                               {notif.message}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">

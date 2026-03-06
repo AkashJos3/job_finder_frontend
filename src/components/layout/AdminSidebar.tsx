@@ -68,7 +68,7 @@ export function AdminSidebar({ activeView, onNavigate, onLogout }: AdminSidebarP
                 />
             )}
 
-            <aside className={`w-64 bg-[#7B1113] h-[100dvh] flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`w-64 bg-[#7B1113] inset-y-0 flex flex-col fixed left-0 z-50 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 flex items-center justify-between">
                     <button
                         onClick={() => handleNavigate('landing')}
