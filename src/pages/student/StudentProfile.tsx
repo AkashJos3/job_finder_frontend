@@ -201,10 +201,11 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
             </div>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-4 py-2 bg-[#F5C518] text-[#1A1A1A] rounded-xl font-medium hover:bg-[#E5B508] transition-colors"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#F5C518] text-[#1A1A1A] rounded-xl font-medium hover:bg-[#E5B508] transition-colors flex-shrink-0"
             >
               <Edit2 className="w-4 h-4" />
-              {isEditing ? 'Save Changes' : 'Edit Profile'}
+              <span className="hidden sm:inline">{isEditing ? 'Save Changes' : 'Edit Profile'}</span>
+              <span className="sm:hidden">{isEditing ? 'Save' : 'Edit'}</span>
             </button>
           </div>
         </header>

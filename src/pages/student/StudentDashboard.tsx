@@ -225,12 +225,12 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
 
 
               </div>
-              <div>
+              <div className="flex-1 min-w-0 pr-2">
                 <p className="hidden md:block text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
                 </p>
-                <h1 className="text-xl md:text-2xl font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
-                  Welcome, <span className="text-[#F5C518]">{userName || 'Student'}!</span>
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-[#1A1A1A] dark:text-white leading-tight break-words">
+                  Welcome, <span className="text-[#F5C518] block sm:inline">{userName || 'Student'}!</span>
                 </h1>
               </div>
             </div>

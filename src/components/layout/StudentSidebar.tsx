@@ -154,9 +154,9 @@ export function StudentSidebar({ activeView, onNavigate, onLogout }: StudentSide
                         className="flex items-center gap-3 p-3 rounded-xl bg-white/5 w-full hover:bg-white/10 transition-colors"
                     >
                         {avatarUrl ? (
-                            <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
+                            <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                         ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                                 {profileName.charAt(0).toUpperCase()}
                             </div>
                         )}
