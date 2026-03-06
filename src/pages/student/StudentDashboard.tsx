@@ -260,7 +260,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
 
                 {/* Notifications Dropdown */}
                 {showNotif && (
-                  <div className="absolute top-12 right-0 w-80 bg-white dark:bg-[#2D2D2D] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden">
+                  <div className="absolute top-12 -right-2 sm:right-0 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white dark:bg-[#2D2D2D] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
                       <h3 className="font-bold text-[#1A1A1A] dark:text-white">Notifications</h3>
                       <span className="text-xs bg-[#F5C518] text-[#1A1A1A] px-2 py-1 rounded-full font-bold">

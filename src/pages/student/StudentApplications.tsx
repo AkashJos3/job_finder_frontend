@@ -82,23 +82,23 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
         {/* Header */}
         <header className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 px-4 md:px-8 py-4 pt-16 lg:pt-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4 w-full overflow-hidden">
+              <div className="flex items-center gap-6 overflow-x-auto hide-scrollbar whitespace-nowrap max-w-full pb-1">
                 <button
                   onClick={() => onNavigate('student-jobs')}
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#1A1A1A] dark:hover:text-white font-medium transition-colors"
+                  className="text-gray-600 dark:text-gray-400 hover:text-[#1A1A1A] dark:hover:text-white font-medium transition-colors flex-shrink-0"
                 >
                   Find Jobs
                 </button>
                 <button
                   onClick={() => onNavigate('student-applications')}
-                  className="text-[#F5C518] font-semibold border-b-2 border-[#F5C518] pb-1"
+                  className="text-[#F5C518] font-semibold border-b-2 border-[#F5C518] pb-1 flex-shrink-0"
                 >
                   My Applications
                 </button>
                 <button
                   onClick={() => onNavigate('student-saved')}
-                  className="text-gray-600 dark:text-gray-400 hover:text-[#1A1A1A] dark:hover:text-white font-medium transition-colors"
+                  className="text-gray-600 dark:text-gray-400 hover:text-[#1A1A1A] dark:hover:text-white font-medium transition-colors flex-shrink-0"
                 >
                   Saved
                 </button>
@@ -113,12 +113,12 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             {/* Tabs */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full overflow-x-auto hide-scrollbar pb-2">
               {(['applied', 'accepted', 'rejected'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === tab
+                  className={`flex-shrink-0 px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === tab
                     ? 'bg-[#F5C518] text-[#1A1A1A]'
                     : 'bg-white dark:bg-[#2D2D2D] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
@@ -134,7 +134,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
 
             <button
               onClick={() => onNavigate('student-jobs')}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-2 flex-shrink-0 w-full md:w-auto justify-center"
             >
               <Search className="w-4 h-4" />
               Find More Jobs

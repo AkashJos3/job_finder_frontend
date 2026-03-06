@@ -355,10 +355,10 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
           {/* Week Calendar */}
           <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl p-5 card-shadow mb-8">
             <div className="flex items-center justify-between">
-              <button onClick={() => setWeekStart(d => addDays(d, -7))} className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <button onClick={() => setWeekStart(d => addDays(d, -7))} className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <ChevronRight className="w-5 h-5 rotate-180 text-gray-600 dark:text-gray-400" />
               </button>
-              <div className="flex gap-2 flex-1 justify-center">
+              <div className="flex gap-2 flex-1 justify-start sm:justify-center overflow-x-auto hide-scrollbar pb-2 mx-2">
                 {weekDays.map(({ date, iso, dayName, dayNum }) => {
                   const count = shifts.filter(s => s.shift_date === iso).length;
                   const isSelected = iso === selectedDate;
@@ -379,7 +379,7 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
                   );
                 })}
               </div>
-              <button onClick={() => setWeekStart(d => addDays(d, 7))} className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <button onClick={() => setWeekStart(d => addDays(d, 7))} className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>

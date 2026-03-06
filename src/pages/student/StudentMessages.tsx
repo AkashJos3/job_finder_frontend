@@ -149,7 +149,7 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
           </div>
         </header>
 
-        <div className="flex h-[calc(100vh-89px)]">
+        <div className="flex h-[calc(100dvh-89px)]">
           {/* Chat List — full width on mobile, fixed 320px on desktop */}
           <div className={`${showChatOnMobile ? 'hidden' : 'flex'} lg:flex w-full lg:w-80 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1A1A] flex-col`}>
             <div className="p-4 border-b border-gray-100 dark:border-gray-800">
@@ -229,8 +229,8 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             )}
-                            <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${isMe ? 'bg-[#F5C518] text-[#1A1A1A] rounded-br-none' : 'bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800'}`}>
-                              <p className="leading-relaxed">{msg.content}</p>
+                            <div className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 rounded-2xl ${isMe ? 'bg-[#F5C518] text-[#1A1A1A] rounded-br-none' : 'bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800'}`}>
+                              <p className="leading-relaxed break-words whitespace-pre-wrap">{msg.content}</p>
                               <p className={`text-xs mt-1 ${isMe ? 'text-[#1A1A1A]/50 text-right' : 'text-gray-400 dark:text-gray-500'}`}>
                                 {formatMessageTime(msg.created_at)}
                               </p>

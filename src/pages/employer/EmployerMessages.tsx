@@ -171,7 +171,7 @@ export function EmployerMessages({ onNavigate, onLogout, initialChat }: Employer
           </div>
         </header>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden h-[calc(100dvh-89px)]">
           {/* Chat List — full width on mobile, fixed 320px on desktop */}
           <div className={`${showChatOnMobile ? 'hidden' : 'flex'} lg:flex w-full lg:w-80 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1A1A] flex-col`}>
             <div className="p-4 border-b border-gray-100 dark:border-gray-800">
