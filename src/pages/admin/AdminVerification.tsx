@@ -380,6 +380,8 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Contact User</p>
                     <p className="font-semibold text-[#1A1A1A] text-lg">{selectedEmployer.profiles?.full_name || 'N/A'}</p>
+                    <p className="text-sm text-gray-500">{selectedEmployer.profiles?.email || 'No email'}</p>
+                    <p className="text-sm text-gray-500">{selectedEmployer.profiles?.phone || 'No phone'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Registration Number</p>
