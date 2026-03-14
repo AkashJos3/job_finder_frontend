@@ -25,6 +25,8 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [todayShifts, setTodayShifts] = useState<any[]>([]);
   const [upcomingShiftsCount, setUpcomingShiftsCount] = useState(0);
+  const [analyticsData, setAnalyticsData] = useState<any[]>([]);
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(true);
   const notifRef = useRef<HTMLDivElement>(null);
 
   // Close notification dropdown when clicking outside
@@ -56,6 +58,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
         fetchApplications(session.access_token);
         fetchShifts(session.access_token);
         fetchNotifications(session.access_token);
+        fetchAnalytics(session.access_token);
       }
     });
   }, []);
@@ -114,15 +117,23 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
     } catch (e) { console.error(e); }
   };
 
-  const analyticsData = [
-    { name: 'Mon', views: 400, applications: 240 },
-    { name: 'Tue', views: 300, applications: 139 },
-    { name: 'Wed', views: 520, applications: 380 },
-    { name: 'Thu', views: 450, applications: 290 },
-    { name: 'Fri', views: 600, applications: 480 },
-    { name: 'Sat', views: 300, applications: 180 },
-    { name: 'Sun', views: 200, applications: 90 },
-  ];
+  const fetchAnalytics = async (token: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/employer/analytics`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const j = await res.json();
+        setAnalyticsData(j.data || []);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAnalyticsLoading(false);
+    }
+  };
+
+
 
   const unreadNotifCount = notifications.filter(n => !n.is_read).length;
 
@@ -235,29 +246,36 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
               </div>
             </div>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={analyticsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#1A1A1A', color: '#fff' }}
-                    itemStyle={{ fontSize: '14px', fontWeight: 500 }}
-                  />
-                  <Area type="monotone" dataKey="views" name="Job Views" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
-                  <Area type="monotone" dataKey="applications" name="Applications" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorApps)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              {isAnalyticsLoading ? (
+                <div className="w-full h-full flex flex-col items-center justify-center space-y-3">
+                  <div className="w-8 h-8 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">Loading live data...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analyticsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#1A1A1A', color: '#fff' }}
+                      itemStyle={{ fontSize: '14px', fontWeight: 500 }}
+                    />
+                    <Area type="monotone" dataKey="views" name="Job Views" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
+                    <Area type="monotone" dataKey="applications" name="Applications" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorApps)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
