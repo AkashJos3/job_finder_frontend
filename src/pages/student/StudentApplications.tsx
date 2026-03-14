@@ -338,26 +338,6 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
             )}
           </div>
 
-          {/* Pagination */}
-          {currentApplications.length > 0 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-white transition-colors">
-                <ChevronRight className="w-4 h-4 rotate-180" />
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#F5C518] text-[#1A1A1A] font-semibold">
-                1
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-white transition-colors">
-                2
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-white transition-colors">
-                3
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-white transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
