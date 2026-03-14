@@ -1,9 +1,11 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, Search, MapPin, Filter, ChevronRight, Plus
+  Bell, Search, MapPin, Filter, ChevronRight, Plus, Calendar, Clock, Video, CheckCircle, XCircle
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
 
@@ -13,11 +15,19 @@ interface StudentApplicationsProps {
 }
 
 export function StudentApplications({ onNavigate, onLogout }: StudentApplicationsProps) {
-  const [activeTab, setActiveTab] = useState<'applied' | 'accepted' | 'rejected'>('applied');
+  const [activeTab, setActiveTab] = useState<'applied' | 'interview' | 'accepted' | 'rejected'>('applied');
 
   const [appsData, setAppsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<any | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const { width, height } = useWindowSize();
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   useEffect(() => {
     fetchApplications();
@@ -41,8 +51,31 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
     }
   };
 
+  const handleAcceptInterview = async (applicationId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`${API_URL}/api/applications/${applicationId}/accept_interview`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (res.ok) {
+        showToast('Interview accepted! Added to your schedule 🎉', 'success');
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4000);
+        fetchApplications();
+      } else {
+        const err = await res.json();
+        showToast(err.error || 'Failed to accept interview', 'error');
+      }
+    } catch (e) {
+      showToast('Network error. Please try again.', 'error');
+    }
+  };
+
   const applications = {
     applied: appsData.filter(a => ['pending', 'Pending'].includes(a.status)),
+    interview: appsData.filter(a => ['interview', 'Interview'].includes(a.status)),
     accepted: appsData.filter(a => ['accepted', 'Accepted', 'approved', 'Approved', 'Confirmed', 'Completed'].includes(a.status)),
     rejected: appsData.filter(a => ['rejected', 'Rejected', 'Cancelled', 'No-show'].includes(a.status)),
   };
@@ -58,6 +91,11 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
     if (['pending', 'Pending'].includes(app.status)) {
       statusColor = 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400';
       statusLabel = 'Pending Review';
+    } else if (['interview', 'Interview'].includes(app.status)) {
+      statusColor = 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400';
+      statusLabel = '📅 Interview Scheduled';
+      iconBg = 'bg-blue-100 dark:bg-blue-900/40';
+      icon = '📅';
     } else if (['accepted', 'Accepted', 'approved', 'Approved', 'Confirmed', 'Completed'].includes(app.status)) {
       statusColor = 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400';
       statusLabel = app.status;
@@ -75,6 +113,12 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[999] px-5 py-3.5 rounded-xl shadow-lg text-white font-medium text-sm transition-all duration-300 ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+          {toast.msg}
+        </div>
+      )}
       <StudentSidebar activeView="student-applications" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
@@ -114,7 +158,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             {/* Tabs */}
             <div className="flex gap-2 w-full overflow-x-auto hide-scrollbar pb-2">
-              {(['applied', 'accepted', 'rejected'] as const).map((tab) => (
+              {(['applied', 'interview', 'accepted', 'rejected'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -189,6 +233,36 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                       <span className="text-green-600 dark:text-green-400 font-semibold">{jobDetails.wage || 'Competitive'}</span>
                     </div>
                   </div>
+
+                  {/* Interview Accept/Decline Buttons */}
+                  {['interview', 'Interview'].includes(app.status) && (
+                    <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <span className="font-semibold text-blue-800 dark:text-blue-300">Interview Proposed</span>
+                      </div>
+                      <p className="text-sm text-blue-700 dark:text-blue-400 mb-3">
+                        Your employer has scheduled an interview. Check your Schedule for details, then accept below!
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleAcceptInterview(app.id)}
+                          className="flex-1 py-2.5 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-600/20"
+                        >
+                          <CheckCircle className="w-4 h-4" /> Accept
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Declining just shows a message — no backend action needed
+                            showToast('You can message the employer to reschedule.', 'error');
+                          }}
+                          className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <XCircle className="w-4 h-4" /> Decline
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
                     <span className="text-sm text-gray-400 dark:text-gray-500">Applied {new Date(app.created_at).toLocaleDateString()}</span>

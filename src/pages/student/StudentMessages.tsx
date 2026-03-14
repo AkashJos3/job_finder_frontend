@@ -1,6 +1,6 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
-import { MessageSquare, Search, Send, Trash2, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Search, Send, Trash2, ArrowLeft, Calendar, Clock, Video } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
@@ -230,7 +230,42 @@ export function StudentMessages({ onNavigate, onLogout }: StudentMessagesProps) 
                               </button>
                             )}
                             <div className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 rounded-2xl ${isMe ? 'bg-[#F5C518] text-[#1A1A1A] rounded-br-none' : 'bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800'}`}>
-                              <p className="leading-relaxed break-words whitespace-pre-wrap">{msg.content}</p>
+                              {msg.content?.startsWith('[INTERVIEW_PROPOSAL]') ? (() => {
+                                try {
+                                  const data = JSON.parse(msg.content.replace('[INTERVIEW_PROPOSAL]', ''));
+                                  const dateObj = new Date(data.interview_date + 'T00:00:00');
+                                  const formatted = dateObj.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+                                  return (
+                                    <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 border border-blue-200 dark:border-blue-800 min-w-[240px]">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                        <span className="font-bold text-blue-800 dark:text-blue-300 text-sm">Interview Proposal</span>
+                                      </div>
+                                      <p className="font-semibold text-[#1A1A1A] dark:text-white mb-2">{data.job_title}</p>
+                                      <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-1">
+                                        <Calendar className="w-4 h-4 text-gray-400" />
+                                        {formatted}
+                                      </div>
+                                      <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-1">
+                                        <Clock className="w-4 h-4 text-gray-400" />
+                                        {data.interview_time}
+                                      </div>
+                                      {data.interview_link && (
+                                        <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 mb-1">
+                                          <Video className="w-4 h-4" />
+                                          <a href={data.interview_link} target="_blank" rel="noopener noreferrer" className="underline truncate">{data.interview_link}</a>
+                                        </div>
+                                      )}
+                                      {data.interview_notes && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">"{data.interview_notes}"</p>
+                                      )}
+                                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-3 font-medium">Check your Applications to accept →</p>
+                                    </div>
+                                  );
+                                } catch { return <p className="leading-relaxed break-words whitespace-pre-wrap">{msg.content}</p>; }
+                              })() : (
+                                <p className="leading-relaxed break-words whitespace-pre-wrap">{msg.content}</p>
+                              )}
                               <p className={`text-xs mt-1 ${isMe ? 'text-[#1A1A1A]/50 text-right' : 'text-gray-400 dark:text-gray-500'}`}>
                                 {formatMessageTime(msg.created_at)}
                               </p>

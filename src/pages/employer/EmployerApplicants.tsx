@@ -1,7 +1,8 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, Plus, MapPin, IndianRupee, Clock, Star, MessageCircle, Search
+  Bell, Plus, MapPin, IndianRupee, Clock, Star, MessageCircle, Search,
+  XCircle, Calendar, CheckCircle, Video, FileText
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
@@ -67,7 +68,15 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
   };
 
 
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected' | 'interview'>('all');
+
+  // Interview state
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+  const [interviewAppId, setInterviewAppId] = useState<string | null>(null);
+  const [interviewDate, setInterviewDate] = useState('');
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewLink, setInterviewLink] = useState('');
+  const [interviewNotes, setInterviewNotes] = useState('');
 
   const pendingApps = appsData.filter(a => ['pending', 'Pending'].includes(a.status));
   const totalCandidates = appsData.length;
@@ -98,6 +107,7 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
     else if (statusFilter === 'pending') matchesStatus = ['pending', 'Pending'].includes(a.status);
     else if (statusFilter === 'accepted') matchesStatus = ['accepted', 'Accepted', 'approved', 'Approved'].includes(a.status);
     else if (statusFilter === 'rejected') matchesStatus = ['rejected', 'Rejected'].includes(a.status);
+    else if (statusFilter === 'interview') matchesStatus = ['interview', 'Interview'].includes(a.status);
 
     const matchesSearch = searchQuery === '' ||
       (a.profiles?.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -131,6 +141,57 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
       showToast('Network error. Please try again.', 'error');
     }
   };
+
+  const handleScheduleInterview = async () => {
+    if (!interviewAppId || !interviewDate || !interviewTime) {
+      showToast("Date and Time are required.", "error");
+      return;
+    }
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch(`${API_URL}/api/applications/${interviewAppId}/schedule_interview`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          interview_date: interviewDate,
+          interview_time: interviewTime,
+          interview_link: interviewLink,
+          interview_notes: interviewNotes
+        })
+      });
+      if (res.ok) {
+        fetchApplications();
+        showToast(`Interview scheduled successfully!`, 'success');
+        closeInterviewModal();
+      } else {
+        const err = await res.json();
+        showToast(err.message || 'Failed to schedule interview', 'error');
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Network error. Please try again.', 'error');
+    }
+  };
+
+  const openInterviewModal = (appId: string) => {
+    setInterviewAppId(appId);
+    setInterviewDate('');
+    setInterviewTime('');
+    setInterviewLink('');
+    setInterviewNotes('');
+    setShowInterviewModal(true);
+  };
+  
+  const closeInterviewModal = () => {
+    setShowInterviewModal(false);
+    setInterviewAppId(null);
+  }
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
@@ -232,7 +293,7 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
           {/* Status Filter + Header */}
           <div className="flex items-center flex-wrap gap-3 mb-6">
             <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white mr-2">Candidates</h2>
-            {(['all', 'pending', 'accepted', 'rejected'] as const).map(s => (
+            {(['all', 'pending', 'interview', 'accepted', 'rejected'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
@@ -240,7 +301,8 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
                   ? s === 'pending' ? 'bg-yellow-400 text-black'
                     : s === 'accepted' ? 'bg-green-500 text-white'
                       : s === 'rejected' ? 'bg-red-500 text-white'
-                        : 'bg-[#1A1A1A] text-white'
+                        : s === 'interview' ? 'bg-blue-500 text-white'
+                          : 'bg-[#1A1A1A] text-white'
                   : 'bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
               >
@@ -292,9 +354,10 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${applicant.status === 'accepted' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
                       : applicant.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'
-                        : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400'
+                        : applicant.status === 'interview' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400'
+                          : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400'
                       }`}>
-                      {(applicant.status || 'pending').toUpperCase()}
+                      {(applicant.status === 'interview' ? 'Interview Scheduled' : applicant.status || 'pending').toUpperCase()}
                     </span>
                   </div>
 
@@ -339,34 +402,27 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-3 mt-6 border-t border-gray-100 dark:border-gray-800 pt-4">
-                    {applicant.status === 'pending' ? (
+                  <div className="flex items-center gap-2 mt-6 border-t border-gray-100 dark:border-gray-800 pt-4">
+                    {(applicant.status === 'pending' || !applicant.status) ? (
                       <>
                         <button
                           onClick={() => handleAction(applicant.id, 'rejected')}
-                          className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          title="Reject Application"
                         >
-                          Reject
+                          <XCircle className="w-5 h-5 text-red-500" />
                         </button>
                         <button
-                          onClick={() => {
-                            const sName = applicant.profiles?.full_name || 'Student';
-                            if (onMessageStudent) {
-                              onMessageStudent({ id: applicant.student_id, full_name: sName });
-                            } else {
-                              onNavigate('employer-messages');
-                            }
-                          }}
-                          className="w-10 h-10 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                          title="Message this student"
+                          onClick={() => openInterviewModal(applicant.id)}
+                          className="flex-1 px-2 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center justify-center gap-1"
                         >
-                          <MessageCircle className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                          <Calendar className="w-4 h-4 text-blue-500" /> <span className="text-sm">Schedule</span>
                         </button>
                         <button
                           onClick={() => handleAction(applicant.id, 'accepted')}
-                          className="flex-1 btn-dark py-2 flex items-center justify-center"
+                          className="flex-1 btn-dark py-2 flex items-center justify-center text-sm"
                         >
-                          Accept
+                          <CheckCircle className="w-4 h-4 mr-1 text-green-400" /> Accept
                         </button>
                       </>
                     ) : (
@@ -412,6 +468,69 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
           </p>
         </footer>
       </main>
+
+      {/* Schedule Interview Modal */}
+      {showInterviewModal && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl relative border border-gray-200 dark:border-gray-800 animate-fade-in-up">
+            <button onClick={closeInterviewModal} className="absolute right-4 top-4 text-gray-400 hover:text-[#1A1A1A] dark:hover:text-white transition-colors">
+              <XCircle className="w-6 h-6" />
+            </button>
+            <h2 className="text-2xl font-bold text-[#1A1A1A] dark:text-white mb-2 flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-blue-500" /> Schedule Interview
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Propose a date, time, and link for the interview. The student will be notified immediately.</p>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-2">Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="date" value={interviewDate} onChange={e => setInterviewDate(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-2">Time</label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="time" value={interviewTime} onChange={e => setInterviewTime(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 text-sm" />
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-2">Meeting Link (Optional)</label>
+                <div className="relative">
+                  <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input type="url" value={interviewLink} onChange={e => setInterviewLink(e.target.value)} placeholder="e.g. Google Meet, Zoom link"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-2">Notes/Instructions</label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <textarea value={interviewNotes} onChange={e => setInterviewNotes(e.target.value)} placeholder="Any special instructions for the candidate..."
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 text-sm h-24 resize-none" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button onClick={closeInterviewModal} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                Cancel
+              </button>
+              <button onClick={handleScheduleInterview} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition">
+                Schedule
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
