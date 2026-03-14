@@ -437,11 +437,15 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                         </div>
                         <div className="bg-white/70 p-3 rounded-lg">
                           <p className="text-xs text-gray-500">Extracted Name</p>
-                          <p className="font-semibold text-[#1A1A1A]">{ai.extracted_name || 'Not found'}</p>
+                          <p className={`font-semibold ${!ai.extracted_name || ai.extracted_name.toLowerCase() === 'not found' ? 'text-red-500 italic' : 'text-[#1A1A1A]'}`}>
+                            {ai.extracted_name || 'Not found'}
+                          </p>
                         </div>
                         <div className="bg-white/70 p-3 rounded-lg">
                           <p className="text-xs text-gray-500">Extracted ID</p>
-                          <p className="font-semibold text-[#1A1A1A]">{ai.extracted_id || 'Not found'}</p>
+                          <p className={`font-semibold ${!ai.extracted_id || ai.extracted_id.toLowerCase() === 'not found' ? 'text-red-500 italic' : 'text-[#1A1A1A]'}`}>
+                            {ai.extracted_id || 'Not found'}
+                          </p>
                         </div>
                         <div className="bg-white/70 p-3 rounded-lg">
                           <p className="text-xs text-gray-500">Name Match</p>
@@ -455,9 +459,14 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                       {ai.id_format_check && (
                         <div className="bg-white/70 p-3 rounded-lg mb-4 text-sm">
                           <p className="text-xs text-gray-500 mb-1">ID Format Validation</p>
-                          <p className={`font-semibold ${ai.id_format_check.valid ? 'text-green-600' : 'text-red-600'}`}>
-                            {ai.id_format_check.valid ? '✅' : '❌'} {ai.id_format_check.details}
-                          </p>
+                          <div className={`flex items-center gap-1.5 font-semibold ${ai.id_format_check.type === 'unknown' || ai.id_format_check.type === 'Generic ID' || !ai.id_format_check.valid ? 'text-orange-600' : 'text-green-600'}`}>
+                            {ai.id_format_check.type === 'unknown' || ai.id_format_check.type === 'Generic ID' || !ai.id_format_check.valid ? (
+                              <ShieldAlert className="w-4 h-4" />
+                            ) : (
+                              <ShieldCheck className="w-4 h-4" />
+                            )}
+                            {ai.id_format_check.details}
+                          </div>
                         </div>
                       )}
 
