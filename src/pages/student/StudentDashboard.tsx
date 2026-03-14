@@ -317,7 +317,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
           {/* Summary Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {/* Nearby Jobs Card */}
-            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800">
+            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-in-up">
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 bg-[#F5C518]/20 dark:bg-[#F5C518]/10 rounded-xl flex items-center justify-center">
                   <Navigation className="w-6 h-6 text-[#F5C518] dark:text-yellow-400" />
@@ -334,7 +334,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
             </div>
 
             {/* Active Applications Card */}
-            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800">
+            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">
                   <Briefcase className="w-6 h-6 text-blue-500 dark:text-blue-400" />
@@ -360,7 +360,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
 
             {/* Application Tracker Card */}
             {activeAppsCount > 0 ? (
-              <div className="bg-[#1A1A1A] rounded-2xl p-6 text-white flex flex-col justify-center min-h-[160px] card-shadow border border-transparent dark:border-gray-800 relative overflow-hidden">
+              <div className="bg-[#1A1A1A] rounded-2xl p-6 text-white flex flex-col justify-center min-h-[160px] card-shadow border border-transparent dark:border-gray-800 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10"></div>
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
@@ -380,7 +380,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
                 </button>
               </div>
             ) : (
-              <div className="bg-[#1A1A1A] rounded-2xl p-6 text-white flex flex-col justify-center items-center text-center min-h-[160px] card-shadow border border-transparent dark:border-gray-800">
+              <div className="bg-[#1A1A1A] rounded-2xl p-6 text-white flex flex-col justify-center items-center text-center min-h-[160px] card-shadow border border-transparent dark:border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                 <Briefcase className="w-12 h-12 text-[#F5C518] mb-4 opacity-70" />
                 <p className="text-lg font-bold">Ready to Work?</p>
                 <p className="text-gray-400 text-sm mt-1 mb-4">Start applying to unlock your schedule.</p>

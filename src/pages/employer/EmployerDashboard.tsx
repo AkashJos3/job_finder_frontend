@@ -172,7 +172,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
           {/* Summary Cards */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {/* New Applications Card */}
-            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800">
+            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-in-up">
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                   <Users className="w-6 h-6 text-blue-500 dark:text-blue-400" />
@@ -192,7 +192,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
             </div>
 
             {/* Upcoming Shifts Card */}
-            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800">
+            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
                   <Clock className="w-6 h-6 text-orange-500 dark:text-orange-400" />

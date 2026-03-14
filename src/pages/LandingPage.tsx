@@ -111,7 +111,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto animate-fade-in-up">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full mb-6">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -142,7 +142,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                 </div>
                 <button
                   onClick={() => onNavigate('login')}
-                  className="bg-[#F5C518] text-[#1A1A1A] font-bold px-5 py-3 rounded-xl sm:rounded-full hover:bg-[#E5B508] transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-md"
+                  className="bg-[#F5C518] text-[#1A1A1A] font-bold px-5 py-3 rounded-xl sm:rounded-full hover:bg-[#E5B508] transition-all duration-300 active:scale-95 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 whitespace-nowrap shadow-md"
                 >
                   <User className="w-4 h-4" />
                   Find Jobs
@@ -171,14 +171,15 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
               <button
                 onClick={() => onNavigate('student-signup')}
-                className="bg-[#F5C518] text-[#1A1A1A] font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-[#E5B508] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                className="bg-[#F5C518] text-[#1A1A1A] font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-[#E5B508] transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 animate-pop"
               >
                 <User className="w-5 h-5" />
                 Find Jobs
               </button>
               <button
                 onClick={() => onNavigate('employer-signup')}
-                className="bg-white text-[#1A1A1A] font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                className="bg-white text-[#1A1A1A] font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 animate-pop"
+                style={{ animationDelay: '100ms' }}
               >
                 <Building2 className="w-5 h-5" />
                 Post a Job
@@ -199,7 +200,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-[#FFFBF0] rounded-2xl p-8 card-shadow hover:card-shadow-hover transition-all duration-300">
+            <div className="bg-[#FFFBF0] rounded-2xl p-8 card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-2 animate-fade-in-up">
               <div className="w-14 h-14 bg-[#F5C518]/20 rounded-xl flex items-center justify-center mb-6">
                 <Shield className="w-7 h-7 text-[#F5C518]" />
               </div>
@@ -211,7 +212,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-[#FFFBF0] rounded-2xl p-8 card-shadow hover:card-shadow-hover transition-all duration-300">
+            <div className="bg-[#FFFBF0] rounded-2xl p-8 card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
                 <MapPin className="w-7 h-7 text-blue-500" />
               </div>
@@ -223,7 +224,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-[#FFFBF0] rounded-2xl p-8 card-shadow hover:card-shadow-hover transition-all duration-300">
+            <div className="bg-[#FFFBF0] rounded-2xl p-8 card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                 <Briefcase className="w-7 h-7 text-green-500" />
               </div>
