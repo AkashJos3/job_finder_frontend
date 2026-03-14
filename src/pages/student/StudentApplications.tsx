@@ -73,6 +73,27 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
     }
   };
 
+  const handleWithdraw = async (applicationId: string) => {
+    if (!window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`${API_URL}/api/applications/${applicationId}/withdraw`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (res.ok) {
+        showToast('Application withdrawn successfully.', 'success');
+        fetchApplications();
+      } else {
+        const err = await res.json();
+        showToast(err.message || err.error || 'Failed to withdraw', 'error');
+      }
+    } catch (e) {
+      showToast('Network error. Please try again.', 'error');
+    }
+  };
+
   const applications = {
     applied: appsData.filter(a => ['pending', 'Pending'].includes(a.status)),
     interview: appsData.filter(a => ['interview', 'Interview'].includes(a.status)),
@@ -275,13 +296,23 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
                     <span className="text-sm text-gray-400 dark:text-gray-500">Applied {new Date(app.created_at).toLocaleDateString()}</span>
-                    <button
-                      onClick={() => setSelectedApp(app)}
-                      className="text-[#F5C518] font-semibold text-sm flex items-center gap-1 hover:underline"
-                    >
-                      View Details
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {['pending', 'Pending'].includes(app.status) && (
+                        <button
+                          onClick={() => handleWithdraw(app.id)}
+                          className="text-red-500 hover:text-red-600 font-semibold text-sm transition-colors"
+                        >
+                          Withdraw
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setSelectedApp(app)}
+                        className="text-[#F5C518] font-semibold text-sm flex items-center gap-1 hover:underline"
+                      >
+                        View Details
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
