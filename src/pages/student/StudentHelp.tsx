@@ -1,6 +1,5 @@
 import type { PageView } from '../../App';
 import {
-  MessageSquare,
   ChevronDown, ChevronRight, Mail, Phone, BookOpen, Shield, FileText
 } from 'lucide-react';
 import { useState } from 'react';
@@ -68,7 +67,7 @@ export function StudentHelp({ onNavigate, onLogout }: StudentHelpProps) {
         {/* Help Content */}
         <div className="p-4 md:p-8">
           {/* Contact Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-10">
+          <div className="grid md:grid-cols-2 gap-6 mb-10">
             <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 text-center">
               <div className="w-14 h-14 bg-[#F5C518]/20 dark:bg-[#F5C518]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-7 h-7 text-[#F5C518]" />
@@ -86,20 +85,9 @@ export function StudentHelp({ onNavigate, onLogout }: StudentHelpProps) {
               </div>
               <h3 className="font-bold text-[#1A1A1A] dark:text-white mb-2">Phone Support</h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Mon-Fri, 9AM - 6PM</p>
-              <a href="tel:+919876543210" className="text-[#F5C518] font-medium hover:underline">
-                +91 98765 43210
+              <a href="tel:+917907764791" className="text-[#F5C518] font-medium hover:underline">
+                +91 79077 64791
               </a>
-            </div>
-
-            <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 text-center">
-              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="font-bold text-[#1A1A1A] dark:text-white mb-2">Live Chat</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Instant support</p>
-              <button className="text-[#F5C518] font-medium hover:underline">
-                Start Chat
-              </button>
             </div>
           </div>
 
