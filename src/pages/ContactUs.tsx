@@ -116,7 +116,7 @@ export function ContactUs({ onNavigate }: ContactUsProps) {
                                     </div>
                                     <div>
                                         <p className="font-semibold mb-1">Email Support</p>
-                                        <p className="text-gray-400">support@afterbell.com<br />partnerships@afterbell.com</p>
+                                        <p className="text-gray-400">supportafterbell@gmail.com<br />partnerships@afterbell.com</p>
                                     </div>
                                 </div>
 

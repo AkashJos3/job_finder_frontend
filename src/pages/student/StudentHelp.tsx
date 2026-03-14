@@ -74,8 +74,8 @@ export function StudentHelp({ onNavigate, onLogout }: StudentHelpProps) {
               </div>
               <h3 className="font-bold text-[#1A1A1A] dark:text-white mb-2">Email Support</h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">We reply within 24 hours</p>
-              <a href="mailto:support@afterbell.com" className="text-[#F5C518] font-medium hover:underline">
-                support@afterbell.com
+              <a href="mailto:supportafterbell@gmail.com" className="text-[#F5C518] font-medium hover:underline">
+                supportafterbell@gmail.com
               </a>
             </div>
 

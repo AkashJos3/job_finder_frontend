@@ -76,7 +76,7 @@ export function HelpPage({ onNavigate }: HelpPageProps) {
                         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Email Us</h3>
                         <p className="text-gray-500 mb-4">Send us your query and we'll get back to you within 24 hours.</p>
                         <span className="text-green-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                            support@afterbell.com <ChevronRight className="w-4 h-4" />
+                            supportafterbell@gmail.com <ChevronRight className="w-4 h-4" />
                         </span>
                     </div>
                 </div>

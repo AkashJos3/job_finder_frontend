@@ -428,7 +428,7 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                           Your verification request was reviewed and explicitly rejected by our compliance team. To protect the platform, further automated submissions are disabled for this account.
                         </p>
                         <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
-                          Please contact support@afterbell.com to resolve this manually.
+                          Please contact supportafterbell@gmail.com to resolve this manually.
                         </p>
                       </div>
                     ) : attemptsCount >= 3 && verifStatus !== 'Verified' ? (
@@ -439,7 +439,7 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                           Your verification requests have been rejected by the AI system multiple times. To protect the platform, further automated submissions are disabled for this account.
                         </p>
                         <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
-                          Please contact support@afterbell.com to resolve this manually.
+                          Please contact supportafterbell@gmail.com to resolve this manually.
                         </p>
                       </div>
                     ) : (

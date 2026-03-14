@@ -91,7 +91,7 @@ export function TermsOfService({ onNavigate }: TermsOfServiceProps) {
                 </div>
 
                 <p className="text-center text-gray-500 text-sm">
-                    Questions? Contact us at <a href="mailto:support@afterbell.com" className="text-[#F5C518] hover:underline">support@afterbell.com</a>
+                    Questions? Contact us at <a href="mailto:supportafterbell@gmail.com" className="text-[#F5C518] hover:underline">supportafterbell@gmail.com</a>
                 </p>
             </main>
         </div>
