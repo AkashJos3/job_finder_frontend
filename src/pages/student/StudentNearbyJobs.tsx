@@ -266,8 +266,17 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
-      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
+    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200 relative">
+      {showConfetti && (
+        <ReactConfetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={500}
+          gravity={0.15}
+          style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
+        />
+      )}
       <StudentSidebar activeView="student-jobs" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Toast Notification */}
