@@ -1,7 +1,7 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  User, Mail, Phone, MapPin, Building2, Lock, BellRing, Shield, FileCheck, Upload
+  User, Mail, Phone, MapPin, Building2, Lock, BellRing, Shield, FileCheck, Upload, ShieldAlert
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
@@ -35,6 +35,8 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
 
+  const [attemptsCount, setAttemptsCount] = useState(0);
+
   useEffect(() => {
     // Check if they are already verified
     supabase.auth.getSession().then(({ data: { session } }: any) => {
@@ -63,7 +65,7 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
         // Fetch detailed verification status
         supabase
           .from('employer_verifications')
-          .select('status')
+          .select('status, ai_analysis')
           .eq('employer_id', session.user.id)
           .single()
           .then(({ data }) => {
@@ -71,6 +73,13 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
               if (data.status === 'rejected') setVerifStatus('Rejected');
               else if (data.status === 'pending') setVerifStatus('Pending');
               else if (data.status === 'approved') setVerifStatus('Verified');
+              
+              if (data.ai_analysis) {
+                try {
+                  const aiData = typeof data.ai_analysis === 'string' ? JSON.parse(data.ai_analysis) : data.ai_analysis;
+                  setAttemptsCount(aiData.submission_attempts || 0);
+                } catch(e) {}
+              }
             }
           });
       }
@@ -155,9 +164,17 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
         })
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Failed to submit verification');
+        if (response.status === 403 && data.message?.includes('maximum')) {
+          setAttemptsCount(4); // Force UI lock
+        }
+        throw new Error(data.message || data.error || 'Failed to submit verification');
+      }
+
+      if (data.attempts_remaining !== undefined) {
+         setAttemptsCount(3 - data.attempts_remaining);
       }
 
       setSubmitMsg('Verification submitted successfully! We will review it shortly.');
@@ -392,13 +409,31 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                   )}
 
                   <div className="space-y-6">
-                    <div className="p-4 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-gray-100 dark:border-gray-800 mb-6">
+                    <div className="p-4 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-gray-100 dark:border-gray-800 mb-6 flex justify-between items-start">
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         To post jobs on AfterBell, you must verify your identity and business. Verification typically takes 24-48 hours.
                       </p>
+                      {attemptsCount > 0 && attemptsCount < 3 && verifStatus !== 'Verified' && (
+                        <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-full whitespace-nowrap">
+                          Attempt {attemptsCount} of 3
+                        </span>
+                      )}
                     </div>
 
-                    {/* Contact Information Section */}
+                    {attemptsCount >= 3 && verifStatus !== 'Verified' ? (
+                      <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-center">
+                        <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                        <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Maximum Attempts Reached</h3>
+                        <p className="text-sm text-red-600 dark:text-red-300">
+                          Your verification requests have been rejected multiple times. To protect the platform, further automated submissions are disabled for this account.
+                        </p>
+                        <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
+                          Please contact support@afterbell.com to resolve this manually.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Contact Information Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-800 pb-6 mb-6">
                       <div>
                         <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">Contact Email</label>
@@ -489,6 +524,8 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                         {isSubmitting ? 'Submitting...' : verifStatus === 'Verified' ? 'Already Verified' : 'Submit for Verification'}
                       </button>
                     </div>
+                  </>
+                  )}
                   </div>
                 </div>
               )}
