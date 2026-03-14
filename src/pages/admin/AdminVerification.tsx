@@ -2,7 +2,7 @@ import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
   Search, RefreshCw, CheckCircle, XCircle, FileCheck,
-  AlertTriangle, ChevronRight
+  AlertTriangle, ChevronRight, Bot, ShieldCheck, ShieldAlert, ShieldX
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
@@ -51,6 +51,38 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
     const matchesStatus = statusFilter === 'all' || merchant.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const getAiAnalysis = (merchant: any) => {
+    try {
+      if (!merchant.ai_analysis) return null;
+      return typeof merchant.ai_analysis === 'string' ? JSON.parse(merchant.ai_analysis) : merchant.ai_analysis;
+    } catch { return null; }
+  };
+
+  const AiConfidenceBadge = ({ merchant }: { merchant: any }) => {
+    const ai = getAiAnalysis(merchant);
+    if (!ai || ai.error) return <span className="text-xs text-gray-400 italic">No AI data</span>;
+    const score = ai.confidence || 0;
+    if (score >= 85 && ai.recommendation === 'auto_approve') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+          <ShieldCheck className="w-3 h-3" />{score}% Auto
+        </span>
+      );
+    } else if (score >= 50) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+          <ShieldAlert className="w-3 h-3" />{score}% Review
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+          <ShieldX className="w-3 h-3" />{score}% Flag
+        </span>
+      );
+    }
+  };
 
   useEffect(() => {
     fetchVerifications();
@@ -196,10 +228,11 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
             <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
               <div className="col-span-3">Entity Details</div>
               <div className="col-span-2">Contact User</div>
-              <div className="col-span-2">Submission</div>
-              <div className="col-span-2">Compliance Docs</div>
+              <div className="col-span-1">Submission</div>
+              <div className="col-span-1">Docs</div>
+              <div className="col-span-2">AI Analysis</div>
               <div className="col-span-2">Status</div>
-              <div className="col-span-1 border-gray-100">Actions</div>
+              <div className="col-span-1">Actions</div>
             </div>
 
             {/* Table Rows */}
@@ -228,23 +261,23 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                   <p className="text-xs text-gray-400 truncate">{merchant.profiles?.email || 'No email'}</p>
                   <p className="text-xs text-gray-400 truncate">{merchant.profiles?.phone || 'No phone'}</p>
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <p className="text-sm text-[#1A1A1A]">
                     {new Date(merchant.submitted_at).toLocaleDateString()}
                   </p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(merchant.submitted_at).toLocaleTimeString()}
-                  </p>
                 </div>
-                <div className="col-span-2 overflow-hidden text-ellipsis whitespace-nowrap pr-2">
+                <div className="col-span-1">
                   {merchant.document_url ? (
-                    <button onClick={() => setSelectedDocUrl(merchant.document_url)} className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                      <FileCheck className="w-4 h-4 text-blue-500" />
-                      <span className="text-sm text-blue-600 underline">View Doc</span>
+                    <button onClick={() => setSelectedDocUrl(merchant.document_url)} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-xs">
+                      <FileCheck className="w-3 h-3 text-blue-500" />
+                      <span className="text-blue-600">View</span>
                     </button>
                   ) : (
-                    <span className="text-sm text-gray-400">No document</span>
+                    <span className="text-xs text-gray-400">None</span>
                   )}
+                </div>
+                <div className="col-span-2">
+                  <AiConfidenceBadge merchant={merchant} />
                 </div>
                 <div className="col-span-2">
                   <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${merchant.status === 'pending'
@@ -382,6 +415,87 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                     </span>
                   </div>
                 </div>
+
+                {/* AI Analysis Report */}
+                {(() => {
+                  const ai = getAiAnalysis(selectedEmployer);
+                  if (!ai || ai.error) return null;
+                  const score = ai.confidence || 0;
+                  const barColor = score >= 85 ? 'bg-green-500' : score >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+                  return (
+                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-5 border border-indigo-100 mb-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Bot className="w-5 h-5 text-indigo-600" />
+                        <p className="text-sm font-bold text-indigo-800">AI Verification Report</p>
+                        <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold text-white ${barColor}`}>
+                          {ai.recommendation === 'auto_approve' ? '✅ Auto-Approved' : ai.recommendation === 'likely_reject' ? '❌ Suspicious' : '⚠️ Needs Review'}
+                        </span>
+                      </div>
+
+                      {/* Confidence Bar */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-600">Confidence Score</span>
+                          <span className="font-bold text-indigo-700">{score}/100</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div className={`h-2.5 rounded-full ${barColor} transition-all duration-500`} style={{ width: `${score}%` }}></div>
+                        </div>
+                      </div>
+
+                      {/* Extracted Details */}
+                      <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                        <div className="bg-white/70 p-3 rounded-lg">
+                          <p className="text-xs text-gray-500">Document Type</p>
+                          <p className="font-semibold text-[#1A1A1A]">{ai.document_type || 'Unknown'}</p>
+                        </div>
+                        <div className="bg-white/70 p-3 rounded-lg">
+                          <p className="text-xs text-gray-500">Extracted Name</p>
+                          <p className="font-semibold text-[#1A1A1A]">{ai.extracted_name || 'Not found'}</p>
+                        </div>
+                        <div className="bg-white/70 p-3 rounded-lg">
+                          <p className="text-xs text-gray-500">Extracted ID</p>
+                          <p className="font-semibold text-[#1A1A1A]">{ai.extracted_id || 'Not found'}</p>
+                        </div>
+                        <div className="bg-white/70 p-3 rounded-lg">
+                          <p className="text-xs text-gray-500">Name Match</p>
+                          <p className={`font-semibold ${ai.name_match === true ? 'text-green-600' : ai.name_match === false ? 'text-red-600' : 'text-gray-400'}`}>
+                            {ai.name_match === true ? '✅ Match' : ai.name_match === false ? '❌ Mismatch' : 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* ID Format Check */}
+                      {ai.id_format_check && (
+                        <div className="bg-white/70 p-3 rounded-lg mb-4 text-sm">
+                          <p className="text-xs text-gray-500 mb-1">ID Format Validation</p>
+                          <p className={`font-semibold ${ai.id_format_check.valid ? 'text-green-600' : 'text-red-600'}`}>
+                            {ai.id_format_check.valid ? '✅' : '❌'} {ai.id_format_check.details}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Red Flags */}
+                      {ai.red_flags && ai.red_flags.length > 0 && (
+                        <div className="bg-red-50 p-3 rounded-lg border border-red-100 mb-4">
+                          <p className="text-xs font-bold text-red-700 mb-2">⚠️ Red Flags ({ai.red_flags.length})</p>
+                          <ul className="space-y-1">
+                            {ai.red_flags.map((flag: string, i: number) => (
+                              <li key={i} className="text-sm text-red-600 flex items-start gap-1">
+                                <span className="mt-0.5">•</span> {flag}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* AI Summary */}
+                      {ai.summary && (
+                        <p className="text-sm text-gray-600 italic">🤖 "{ai.summary}"</p>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {selectedEmployer.document_url && (
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-6">
