@@ -63,6 +63,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   // Report modal state
   const [reportJobId, setReportJobId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
+  const [reportSeverity, setReportSeverity] = useState<'low' | 'medium' | 'high'>('medium');
 
   // Sync search query changes back to global state
   useEffect(() => {
@@ -196,7 +197,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ job_id: reportJobId, reason: reportReason })
+        body: JSON.stringify({ job_id: reportJobId, reason: reportReason, severity: reportSeverity })
       });
 
       if (response.ok) {
@@ -211,6 +212,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
     } finally {
       setReportJobId(null);
       setReportReason('');
+      setReportSeverity('medium');
     }
   };
 
@@ -653,9 +655,33 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
               rows={3}
               className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-gray-700 rounded-xl text-[#1A1A1A] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
             />
+            {/* Severity Selector */}
+            <div className="mt-4">
+              <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-200 mb-2">Severity Level</label>
+              <div className="flex gap-2">
+                {(['low', 'medium', 'high'] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setReportSeverity(level)}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-all duration-200 ${
+                      reportSeverity === level
+                        ? level === 'low'
+                          ? 'bg-green-100 dark:bg-green-900/40 border-green-400 text-green-700 dark:text-green-400'
+                          : level === 'medium'
+                            ? 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-400 text-yellow-700 dark:text-yellow-400'
+                            : 'bg-red-100 dark:bg-red-900/40 border-red-400 text-red-700 dark:text-red-400'
+                        : 'bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {level.charAt(0).toUpperCase() + level.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => { setReportJobId(null); setReportReason(''); }}
+                onClick={() => { setReportJobId(null); setReportReason(''); setReportSeverity('medium'); }}
                 className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition-colors"
               >
                 Cancel
