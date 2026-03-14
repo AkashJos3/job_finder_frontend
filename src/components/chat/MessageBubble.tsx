@@ -80,14 +80,24 @@ export function MessageBubble({
                     <Clock className="w-4 h-4 text-gray-400" />
                     {data.interview_time}
                   </div>
-                  {data.interview_link && (
-                    <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 mb-1">
-                      <Video className="w-4 h-4 flex-shrink-0" />
-                      <a href={data.interview_link} target="_blank" rel="noopener noreferrer" className="underline truncate">
-                        {data.interview_link}
-                      </a>
-                    </div>
-                  )}
+                  {data.interview_link && (() => {
+                    const rawLink = data.interview_link.trim();
+                    const safeLink = rawLink.match(/^https?:\/\//i) ? rawLink : `https://${rawLink}`;
+                    return (
+                      <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 mb-1">
+                        <Video className="w-4 h-4 flex-shrink-0" />
+                        <a
+                          href={safeLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="underline truncate hover:text-blue-800 dark:hover:text-blue-300"
+                        >
+                          {rawLink}
+                        </a>
+                      </div>
+                    );
+                  })()}
                   {data.interview_notes && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">"{data.interview_notes}"</p>
                   )}

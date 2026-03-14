@@ -242,7 +242,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                   <TrendingUp className="w-5 h-5 text-[#F5C518]" />
                   Analytics Overview
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Job views vs Applications (Last 7 Days)</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Applications (Last 7 Days)</p>
               </div>
             </div>
             <div className="h-[300px] w-full">
@@ -255,10 +255,6 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analyticsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                      </linearGradient>
                       <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
                         <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
@@ -271,7 +267,6 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#1A1A1A', color: '#fff' }}
                       itemStyle={{ fontSize: '14px', fontWeight: 500 }}
                     />
-                    <Area type="monotone" dataKey="views" name="Job Views" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
                     <Area type="monotone" dataKey="applications" name="Applications" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorApps)" />
                   </AreaChart>
                 </ResponsiveContainer>

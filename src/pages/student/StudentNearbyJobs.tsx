@@ -50,6 +50,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [visibleJobCount, setVisibleJobCount] = useState(6);
   const { width, height } = useWindowSize();
 
   // Toast notification state
@@ -472,7 +473,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                 ))}
               </div>
             ) : filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
+              filteredJobs.slice(0, visibleJobCount).map((job) => (
                 <div key={job.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -563,9 +564,12 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
           </div>
 
           {/* Load More */}
-          {filteredJobs.length > 0 && (
+          {filteredJobs.length > 0 && visibleJobCount < filteredJobs.length && (
             <div className="text-center mt-8">
-              <button className="px-8 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 font-medium hover:border-[#F5C518] hover:text-[#F5C518] dark:hover:border-[#F5C518] dark:hover:text-[#F5C518] transition-all duration-200">
+              <button
+                onClick={() => setVisibleJobCount(prev => prev + 6)}
+                className="px-8 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 font-medium hover:border-[#F5C518] hover:text-[#F5C518] dark:hover:border-[#F5C518] dark:hover:text-[#F5C518] transition-all duration-200"
+              >
                 LOAD MORE JOBS
               </button>
             </div>
