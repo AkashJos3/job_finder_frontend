@@ -4,6 +4,8 @@ import {
   Navigation, Bookmark, Flame, Settings, Search, Bell, AlertTriangle, Sparkles, X, Loader2
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
@@ -47,6 +49,8 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize();
 
   // Toast notification state
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -157,6 +161,8 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
       if (response.ok) {
         setAppliedJobs(prev => new Set(prev).add(isApplyingToJob.id));
         showToast("Successfully applied! You can view it in 'My Applications'.", 'success');
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4000);
         closeModal();
       } else {
         const err = await response.json();
@@ -258,6 +264,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <StudentSidebar activeView="student-jobs" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Toast Notification */}

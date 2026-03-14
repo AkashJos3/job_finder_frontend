@@ -5,6 +5,8 @@ import {
   AlertTriangle, ChevronRight, Bot, ShieldCheck, ShieldAlert, ShieldX
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { AdminSidebar } from '../../components/layout/AdminSidebar';
 
@@ -24,6 +26,9 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
   const [selectedEmployer, setSelectedEmployer] = useState<any | null>(null);
 
   const [docBlobUrl, setDocBlobUrl] = useState<string | null>(null);
+  
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize();
 
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
   const showToast = (msg: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -123,6 +128,13 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
         })
       });
       if (res.ok) {
+        if (newStatus === 'approved') {
+          showToast("Employer verified successfully!", 'success');
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 4000);
+        } else {
+          showToast("Employer rejected.", 'info');
+        }
         fetchVerifications();
       } else {
         const err = await res.json();
@@ -135,6 +147,7 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] flex">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <AdminSidebar activeView="admin-verification" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Toast Notification */}

@@ -1,9 +1,10 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, Clock, ChevronRight, Users, Eye, Calendar, MapPin
+  Bell, Clock, ChevronRight, Users, Eye, Calendar, MapPin, TrendingUp
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
 
@@ -113,6 +114,16 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
     } catch (e) { console.error(e); }
   };
 
+  const analyticsData = [
+    { name: 'Mon', views: 400, applications: 240 },
+    { name: 'Tue', views: 300, applications: 139 },
+    { name: 'Wed', views: 520, applications: 380 },
+    { name: 'Thu', views: 450, applications: 290 },
+    { name: 'Fri', views: 600, applications: 480 },
+    { name: 'Sat', views: 300, applications: 180 },
+    { name: 'Sun', views: 200, applications: 90 },
+  ];
+
   const unreadNotifCount = notifications.filter(n => !n.is_read).length;
 
   return (
@@ -209,6 +220,44 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
               >
                 View schedule <ChevronRight className="w-4 h-4" />
               </button>
+            </div>
+          </div>
+          
+          {/* Analytics Chart */}
+          <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 mb-8 card-shadow border border-transparent dark:border-gray-800 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-[#F5C518]" />
+                  Analytics Overview
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Job views vs Applications (Last 7 Days)</p>
+              </div>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={analyticsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#1A1A1A', color: '#fff' }}
+                    itemStyle={{ fontSize: '14px', fontWeight: 500 }}
+                  />
+                  <Area type="monotone" dataKey="views" name="Job Views" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
+                  <Area type="monotone" dataKey="applications" name="Applications" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorApps)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
