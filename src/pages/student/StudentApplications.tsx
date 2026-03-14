@@ -225,7 +225,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
               const { statusLabel, statusColor, icon, iconBg } = getAppCardProps(app);
               const jobDetails = app.jobs || {};
               const companyName = jobDetails.company_name || jobDetails.profiles?.full_name || 'Unknown Company';
-              const avatarUrl = jobDetails.profiles?.avatar_url;
+              const avatarUrl = jobDetails.image_url || jobDetails.profiles?.avatar_url;
 
               return (
                 <div key={app.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow hover:card-shadow-hover border border-transparent dark:border-gray-800 transition-all duration-300">
