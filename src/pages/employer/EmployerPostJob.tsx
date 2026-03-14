@@ -4,6 +4,8 @@ import {
   Bell, ChevronLeft, Upload, Camera, Check, Flame, MapPin, Clock, IndianRupee, Eye, Briefcase, Shield
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
 
@@ -27,6 +29,8 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
   const [isParsing, setIsParsing] = useState(false);
   const [shopImage, setShopImage] = useState<string | null>(null);
   const [shopImageName, setShopImageName] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => {
@@ -159,7 +163,11 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
         throw new Error(errData.message || 'Failed to post job');
       }
 
-      onNavigate('employer-dashboard');
+      setShowConfetti(true);
+      setTimeout(() => {
+        setShowConfetti(false);
+        onNavigate('employer-dashboard');
+      }, 3000);
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -169,6 +177,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <EmployerSidebar activeView="employer-postjob" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}

@@ -5,6 +5,8 @@ import {
   XCircle, Calendar, CheckCircle, Video, FileText
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
 
@@ -21,6 +23,8 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
   const [studentRatings, setStudentRatings] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize();
 
   const showToast = useCallback((msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -132,6 +136,10 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
       if (res.ok) {
         fetchApplications();
         showToast(`Application ${action} successfully!`, 'success');
+        if (action === 'accepted') {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 4000);
+        }
       } else {
         const err = await res.json();
         showToast(err.message || 'Failed to update status', 'error');
@@ -168,6 +176,8 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
       if (res.ok) {
         fetchApplications();
         showToast(`Interview scheduled successfully!`, 'success');
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4000);
         closeInterviewModal();
       } else {
         const err = await res.json();
@@ -195,6 +205,7 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <EmployerSidebar activeView="employer-applicants" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Toast Notification */}

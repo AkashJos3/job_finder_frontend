@@ -420,12 +420,23 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                       )}
                     </div>
 
-                    {attemptsCount >= 3 && verifStatus !== 'Verified' ? (
+                    {verifStatus === 'Rejected' ? (
+                      <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-center">
+                        <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                        <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Verification Rejected</h3>
+                        <p className="text-sm text-red-600 dark:text-red-300">
+                          Your verification request was reviewed and explicitly rejected by our compliance team. To protect the platform, further automated submissions are disabled for this account.
+                        </p>
+                        <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
+                          Please contact support@afterbell.com to resolve this manually.
+                        </p>
+                      </div>
+                    ) : attemptsCount >= 3 && verifStatus !== 'Verified' ? (
                       <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-center">
                         <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
                         <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Maximum Attempts Reached</h3>
                         <p className="text-sm text-red-600 dark:text-red-300">
-                          Your verification requests have been rejected multiple times. To protect the platform, further automated submissions are disabled for this account.
+                          Your verification requests have been rejected by the AI system multiple times. To protect the platform, further automated submissions are disabled for this account.
                         </p>
                         <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
                           Please contact support@afterbell.com to resolve this manually.

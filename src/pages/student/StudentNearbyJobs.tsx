@@ -473,10 +473,10 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
               </div>
             ) : filteredJobs.length > 0 ? (
               filteredJobs.map((job) => (
-                <div key={job.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 hover:card-shadow-hover transition-all duration-300">
+                <div key={job.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center text-2xl`}>
+                      <div className={`w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform`}>
                         💼
                       </div>
                       <div>
