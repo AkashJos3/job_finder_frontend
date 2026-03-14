@@ -271,20 +271,6 @@ export function AdminReports({ onNavigate, onLogout }: AdminReportsProps) {
               </div>
             )}
           </div>
-
-          {/* Warning Escalation Info */}
-          <div className="mt-6 bg-[#FFF8E1] rounded-2xl p-6 border border-[#F5C518]/20">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-[#F5C518] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-[#1A1A1A] mb-2">Warning Escalation Policy</h3>
-                <p className="text-sm text-gray-600">
-                  First violation: Warning issued. Second violation: 7-day suspension.
-                  Third violation: Permanent account ban. No-show abuse affects student credibility score.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}

@@ -228,11 +228,11 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
             <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
               <div className="col-span-3">Entity Details</div>
               <div className="col-span-2">Contact User</div>
-              <div className="col-span-1">Submission</div>
+              <div className="col-span-1">Date</div>
               <div className="col-span-1">Docs</div>
               <div className="col-span-2">AI Analysis</div>
-              <div className="col-span-2">Status</div>
-              <div className="col-span-1">Actions</div>
+              <div className="col-span-1">Status</div>
+              <div className="col-span-2 text-right">Actions</div>
             </div>
 
             {/* Table Rows */}
@@ -244,25 +244,25 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
               <div key={merchant.id} className="grid grid-cols-12 gap-4 px-6 py-5 border-t border-gray-100 items-center">
                 <div className="col-span-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {merchant.business_name ? merchant.business_name.substring(0, 2).toUpperCase() : 'B'}
                     </div>
-                    <div>
-                      <p className="font-medium text-[#1A1A1A] truncate max-w-[150px]">{merchant.business_name}</p>
-                      <p className="text-xs text-gray-400 truncate max-w-[150px]">Reg: {merchant.registration_number}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-[#1A1A1A] truncate">{merchant.business_name}</p>
+                      <p className="text-xs text-gray-400 truncate">Reg: {merchant.registration_number}</p>
                       <button onClick={() => setSelectedEmployer(merchant)} className="mt-1 text-xs text-blue-500 hover:text-blue-700 underline text-left">
                         View full details
                       </button>
                     </div>
                   </div>
                 </div>
-                <div className="col-span-2 text-sm text-gray-600 truncate">
+                <div className="col-span-2 min-w-0">
                   <p className="font-medium text-[#1A1A1A] truncate">{merchant.profiles?.full_name || 'N/A'}</p>
                   <p className="text-xs text-gray-400 truncate">{merchant.profiles?.email || 'No email'}</p>
                   <p className="text-xs text-gray-400 truncate">{merchant.profiles?.phone || 'No phone'}</p>
                 </div>
                 <div className="col-span-1">
-                  <p className="text-sm text-[#1A1A1A]">
+                  <p className="text-xs text-[#1A1A1A]">
                     {new Date(merchant.submitted_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -279,8 +279,8 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                 <div className="col-span-2">
                   <AiConfidenceBadge merchant={merchant} />
                 </div>
-                <div className="col-span-2">
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${merchant.status === 'pending'
+                <div className="col-span-1">
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${merchant.status === 'pending'
                     ? 'bg-orange-100 text-orange-700'
                     : merchant.status === 'approved'
                       ? 'bg-green-100 text-green-700'
@@ -292,7 +292,7 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                     {merchant.status.toUpperCase()}
                   </span>
                 </div>
-                <div className="col-span-1 flex items-center gap-2">
+                <div className="col-span-2 flex items-center gap-2 justify-end">
                   {merchant.status === 'pending' ? (
                     <div className="flex items-center gap-1">
                       <button
@@ -320,20 +320,6 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
             {/* Pagination Controls Hidden, we show all filtered */}
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
               <p className="text-sm text-gray-500">Showing <span className="font-medium">{filteredMerchants.length}</span> results</p>
-            </div>
-          </div>
-
-          {/* Guidelines */}
-          <div className="mt-6 bg-[#FFF8E1] rounded-2xl p-6 border border-[#F5C518]/20">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-[#F5C518] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-[#1A1A1A] mb-2">Verification Guidelines (India)</h3>
-                <p className="text-sm text-gray-600">
-                  Ensure GSTIN matches the registered business name on the portal. For &quot;Food & Beverage&quot; merchants,
-                  verify FSSAI license validity on the FoSCoS portal. Check PAN validity for sole proprietorships.
-                </p>
-              </div>
             </div>
           </div>
         </div>
