@@ -16,6 +16,8 @@ interface AdminUsersProps {
 export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps) {
   const [activeTab, setActiveTab] = useState<'students' | 'employers' | 'banned'>(initialTab || 'students');
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const USERS_PER_PAGE = 10;
 
   useEffect(() => {
     if (initialTab) {
@@ -135,6 +137,13 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
   };
 
   const currentUsers = users[activeTab];
+  const totalPages = Math.max(1, Math.ceil(currentUsers.length / USERS_PER_PAGE));
+  const paginatedUsers = currentUsers.slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE);
+
+  // Reset page when switching tabs
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] flex" >
@@ -248,7 +257,8 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
 
             {/* Table Rows */}
             {
-              currentUsers.map((user: any) => (
+              currentUsers.length === 0 ? null :
+              paginatedUsers.map((user: any) => (
                 <div key={user.id} className="grid grid-cols-12 gap-4 px-6 py-5 border-t border-gray-100 items-center">
                   <div className="col-span-3">
                     <div className="flex items-center gap-3">
@@ -351,22 +361,38 @@ export function AdminUsers({ onNavigate, onLogout, initialTab }: AdminUsersProps
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between mt-6" >
-            <p className="text-sm text-gray-500">
-              Showing <span className="font-medium">1-{currentUsers.length}</span> of <span className="font-medium">{currentUsers.length}</span> users
-            </p>
-            <div className="flex items-center gap-2">
-              <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
-                Previous
-              </button>
-              <button className="px-4 py-2 bg-[#F5C518] rounded-lg text-sm font-medium text-[#1A1A1A]">
-                1
-              </button>
-              <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
-                Next
-              </button>
+          {currentUsers.length > 0 && (
+            <div className="flex items-center justify-between mt-6">
+              <p className="text-sm text-gray-500">
+                Showing <span className="font-medium">{(currentPage - 1) * USERS_PER_PAGE + 1}-{Math.min(currentPage * USERS_PER_PAGE, currentUsers.length)}</span> of <span className="font-medium">{currentUsers.length}</span> users
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 border border-gray-200 rounded-lg text-sm transition-colors ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-white'}`}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${page === currentPage ? 'bg-[#F5C518] text-[#1A1A1A]' : 'border border-gray-200 text-gray-600 hover:bg-white'}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`px-4 py-2 border border-gray-200 rounded-lg text-sm transition-colors ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-white'}`}
+                >
+                  Next
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}
