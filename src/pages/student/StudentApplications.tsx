@@ -73,6 +73,27 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
     }
   };
 
+  const handleDeclineInterview = async (applicationId: string) => {
+    if (!window.confirm('Are you sure you want to decline this interview?')) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`${API_URL}/api/applications/${applicationId}/decline_interview`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (res.ok) {
+        showToast('Interview declined.', 'success');
+        fetchApplications();
+      } else {
+        const err = await res.json();
+        showToast(err.error || 'Failed to decline interview', 'error');
+      }
+    } catch (e) {
+      showToast('Network error. Please try again.', 'error');
+    }
+  };
+
   const handleWithdraw = async (applicationId: string) => {
     if (!window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) return;
     try {
@@ -282,10 +303,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                           <CheckCircle className="w-4 h-4" /> Accept
                         </button>
                         <button
-                          onClick={() => {
-                            // Declining just shows a message — no backend action needed
-                            showToast('You can message the employer to reschedule.', 'error');
-                          }}
+                          onClick={() => handleDeclineInterview(app.id)}
                           className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
                         >
                           <XCircle className="w-4 h-4" /> Decline
