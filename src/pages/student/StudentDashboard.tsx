@@ -2,11 +2,12 @@ import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
   Clock, ChevronRight, Bookmark, Navigation,
-  Bell, Search, Briefcase
+  Search, Briefcase, AlertCircle
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
+import { NotificationBell } from '../../components/layout/NotificationBell';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -50,25 +51,11 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
   const [pendingAppsCount, setPendingAppsCount] = useState<number>(0);
   const [totalJobsCount, setTotalJobsCount] = useState<number>(0);
   const [todayJobsCount, setTodayJobsCount] = useState<number>(0);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [showNotif, setShowNotif] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [allMapJobs, setAllMapJobs] = useState<any[]>([]);
-  const notifRef = useRef<HTMLDivElement>(null);
-
-  // Close notification dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setShowNotif(false);
-      }
-    }
-    if (showNotif) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showNotif]);
+  const [profileCompletion, setProfileCompletion] = useState<number>(0);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -82,7 +69,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
       if (session) {
         supabase
           .from('profiles')
-          .select('full_name, latitude, longitude, avatar_url')
+          .select('*')
           .eq('id', session.user.id)
           .single()
           .then(({ data, error }) => {
@@ -99,6 +86,14 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
             if (data.avatar_url) {
               setAvatarUrl(data.avatar_url);
             }
+
+            // Calculate Profile Completion
+            const requiredFields = ['full_name', 'phone', 'university', 'course', 'year', 'address', 'bio', 'avatar_url'];
+            const missing = requiredFields.filter(f => !data[f]);
+            const completePct = Math.round(((requiredFields.length - missing.length) / requiredFields.length) * 100);
+            setProfileCompletion(completePct);
+            setMissingFields(missing);
+
             if (data.latitude && data.longitude) {
               setUserLocation({ lat: data.latitude, lng: data.longitude });
               fetchJobs(session.access_token, data.latitude, data.longitude);
@@ -106,42 +101,12 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
               fetchJobs(session.access_token);
             }
           });
-
         fetchApplications(session.access_token);
-        fetchNotifications(session.access_token);
       }
     });
   }, []);
 
-  const fetchNotifications = async (token: string) => {
-    try {
-      const response = await fetch(`${API_URL}/api/notifications`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const resData = await response.json();
-        setNotifications(resData.data || []);
-      }
-    } catch (err) {
-      console.error("Failed to fetch notifications:", err);
-    }
-  };
 
-  const markAsRead = async (notifId: string) => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      await fetch(`${API_URL}/api/notifications/${notifId}/read`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      fetchNotifications(session.access_token);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const fetchJobs = async (token: string, lat?: number, lng?: number) => {
     try {
@@ -247,49 +212,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] transition-all duration-200"
                 />
               </div>
-              <div className="relative" ref={notifRef}>
-                <button
-                  onClick={() => setShowNotif(!showNotif)}
-                  className="w-10 h-10 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative"
-                >
-                  <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  {notifications.filter(n => !n.is_read).length > 0 && (
-                    <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-[#2D2D2D]"></span>
-                  )}
-                </button>
-
-                {/* Notifications Dropdown */}
-                {showNotif && (
-                  <div className="fixed top-20 left-4 right-4 sm:absolute sm:top-12 sm:inset-auto sm:right-0 w-auto sm:w-80 max-w-sm bg-white dark:bg-[#2D2D2D] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                      <h3 className="font-bold text-[#1A1A1A] dark:text-white">Notifications</h3>
-                      <span className="text-xs bg-[#F5C518] text-[#1A1A1A] px-2 py-1 rounded-full font-bold">
-                        {notifications.filter(n => !n.is_read).length} New
-                      </span>
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No notifications yet</div>
-                      ) : (
-                        notifications.map((notif) => (
-                          <div
-                            key={notif.id}
-                            onClick={() => !notif.is_read && markAsRead(notif.id)}
-                            className={`p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer transition-colors ${notif.is_read ? 'bg-white dark:bg-[#2D2D2D] hover:bg-gray-50 dark:hover:bg-gray-800' : 'bg-[#FFFBF0] dark:bg-yellow-900/10 hover:bg-amber-50 dark:hover:bg-yellow-900/20'}`}
-                          >
-                            <p className={`text-sm break-words whitespace-pre-wrap ${notif.is_read ? 'text-gray-600 dark:text-gray-400' : 'text-[#1A1A1A] dark:text-white font-medium'}`}>
-                              {notif.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {new Date(notif.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <NotificationBell />
               <button
                 onClick={() => onNavigate('student-profile')}
                 className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold hover:ring-2 hover:ring-[#F5C518] transition-all overflow-hidden"
@@ -314,6 +237,54 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
 
         {/* Dashboard Content */}
         <div className="p-4 md:p-8">
+          {/* Profile Completion Bar */}
+          {profileCompletion < 100 && (
+            <div className="mb-8 bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-gray-100 dark:border-gray-800 animate-fade-in-up">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[#1A1A1A] dark:text-white">Complete your profile</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      You're missing {missingFields.length} field{missingFields.length !== 1 ? 's' : ''}. Complete it to stand out!
+                    </p>
+                  </div>
+                </div>
+                <div className="font-bold text-2xl text-[#1A1A1A] dark:text-white">
+                  {profileCompletion}%
+                </div>
+              </div>
+              
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 mb-4 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-orange-400 to-[#F5C518] h-3 rounded-full transition-all duration-1000 ease-out relative" 
+                  style={{ width: `${profileCompletion}%` }}
+                >
+                  <div className="absolute top-0 right-0 bottom-0 left-0 bg-white/20 animate-pulse"></div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {missingFields.slice(0, 3).map(f => (
+                    <span key={f} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-md capitalize font-medium">
+                      {f.replace('_', ' ')}
+                    </span>
+                  ))}
+                  {missingFields.length > 3 && <span className="text-gray-400 font-medium">+{missingFields.length - 3} more</span>}
+                </div>
+                <button
+                  onClick={() => onNavigate('student-profile')}
+                  className="w-full sm:w-auto px-6 py-2 bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm whitespace-nowrap"
+                >
+                  Update Profile
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Summary Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {/* Nearby Jobs Card */}

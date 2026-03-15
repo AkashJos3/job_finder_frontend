@@ -6,6 +6,7 @@ import {
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
+import { NotificationBell } from '../../components/layout/NotificationBell';
 
 interface EmployerMyJobsProps {
   onNavigate: (view: PageView) => void;
@@ -324,6 +325,7 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
               >
                 + Post New Job
               </button>
+              <NotificationBell />
             </div>
           </div>
         </header>

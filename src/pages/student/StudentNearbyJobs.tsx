@@ -8,6 +8,7 @@ import ReactConfetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
+import { NotificationBell } from '../../components/layout/NotificationBell';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -325,6 +326,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] w-full md:w-56 transition-colors duration-200"
                 />
               </div>
+              <NotificationBell />
             </div>
           </div>
         </header>

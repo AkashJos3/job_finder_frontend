@@ -8,6 +8,7 @@ import ReactConfetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
+import { NotificationBell } from '../../components/layout/NotificationBell';
 
 interface StudentApplicationsProps {
   onNavigate: (view: PageView) => void;
@@ -199,6 +200,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                 </button>
               </div>
             </div>
+            <NotificationBell />
           </div>
         </header>
 
