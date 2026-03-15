@@ -47,7 +47,7 @@ export function NotificationBell() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       await fetch(`${API_URL}/api/notifications/${notifId}/read`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
       // Optimistic update
