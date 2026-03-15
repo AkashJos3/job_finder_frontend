@@ -88,7 +88,7 @@ export function StudentDashboard({ onNavigate, onLogout, setGlobalSearchQuery }:
             }
 
             // Calculate Profile Completion
-            const requiredFields = ['full_name', 'phone', 'university', 'course', 'year', 'address', 'bio', 'avatar_url'];
+            const requiredFields = ['full_name', 'phone', 'university', 'course', 'year', 'address', 'avatar_url'];
             const missing = requiredFields.filter(f => !data[f]);
             const completePct = Math.round(((requiredFields.length - missing.length) / requiredFields.length) * 100);
             setProfileCompletion(completePct);
