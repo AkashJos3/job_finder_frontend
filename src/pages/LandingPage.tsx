@@ -1,5 +1,5 @@
 import type { PageView } from '../App';
-import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2, Coffee } from 'lucide-react';
+import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2, Coffee, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 
@@ -19,7 +19,7 @@ const marqueeJobs = [
 // Animation Variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
 };
 
 const staggerContainer = {
@@ -379,7 +379,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               { role: "Coffee Shop Staff", company: "Bean & Brew Co.", price: "₹450/day", dist: "Kochi", icon: Coffee, bg: "bg-[#F5C518]" },
               { role: "Library Assistant", company: "City Public Library", price: "₹350/day", dist: "Kozhikode", icon: Star, bg: "bg-purple-500" },
               { role: "Garden Help", company: "GreenThumb Nursery", price: "₹400/day", dist: "Trivandrum", icon: Shield, bg: "bg-green-500" },
-              { role: "Math Tutor", company: "TopGrade", price: "₹600/day", dist: "Thrissur", icon: () => <b className="text-[#1A1A1A] text-xl">M</b>, bg: "bg-blue-400" }
+              { role: "Math Tutor", company: "TopGrade", price: "₹600/day", dist: "Thrissur", icon: GraduationCap, bg: "bg-blue-400" }
             ].map((job, i) => (
               <motion.div 
                 key={i}
@@ -400,7 +400,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                 
                 <div className="flex items-center gap-4 mb-6 relative z-10">
                   <div className={`w-14 h-14 ${job.bg} rounded-2xl flex items-center justify-center text-[#1A1A1A] font-bold shadow-lg`}>
-                    {typeof job.icon === 'function' ? job.icon() : <job.icon className="w-6 h-6 text-[#1A1A1A]" />}
+                    <job.icon className="w-6 h-6 text-[#1A1A1A]" />
                   </div>
                   <div>
                     <span className="text-xs font-bold tracking-wider text-[#F5C518] uppercase">Part-time</span>
