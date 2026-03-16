@@ -2,6 +2,7 @@ import type { PageView } from '../App';
 import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2, Coffee, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 
 interface LandingPageProps {
   onNavigate: (view: PageView) => void;
@@ -17,12 +18,12 @@ const marqueeJobs = [
 ];
 
 // Animation Variants
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8 } }
 };
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
