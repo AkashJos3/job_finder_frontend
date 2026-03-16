@@ -3,6 +3,8 @@ import { supabase } from './lib/supabaseClient';
 import { keepBackendAlive } from './lib/api';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CustomCursor } from './components/ui/CustomCursor';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignupPage';
@@ -405,7 +407,19 @@ function App() {
                   <button onClick={() => setGlobalToast(null)} className="opacity-70 hover:opacity-100 text-lg leading-none">×</button>
                 </div>
               )}
-              {renderPage()}
+              <CustomCursor />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentView}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="min-h-screen"
+                >
+                  {renderPage()}
+                </motion.div>
+              </AnimatePresence>
             </>
           )}
         </div>

@@ -1,8 +1,9 @@
 import type { PageView } from '../App';
-import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2, Coffee, GraduationCap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Bell, MapPin, Search, Briefcase, Shield, Clock, ChevronRight, Star, Menu, X, User, Building2, Coffee, GraduationCap, Quote } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
+import Spline from '@splinetool/react-spline';
 
 interface LandingPageProps {
   onNavigate: (view: PageView) => void;
@@ -37,6 +38,13 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollYProgress, scrollY } = useScroll();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Draw Path for How It works
+  const howItWorksRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: pathProgress } = useScroll({
+    target: howItWorksRef,
+    offset: ["start center", "end center"]
+  });
 
   // Typewriter effect state
   const searchPlaceholders = [
@@ -121,21 +129,21 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              <motion.button whileHover={{ y: -2 }} onClick={() => onNavigate('landing')} className="text-white hover:text-[#F5C518] font-medium transition-colors">Home</motion.button>
-              <motion.button whileHover={{ y: -2 }} onClick={() => onNavigate('about')} className="text-gray-400 hover:text-[#F5C518] font-medium transition-colors">About</motion.button>
-              <motion.button whileHover={{ y: -2 }} onClick={() => onNavigate('login')} className="text-gray-400 hover:text-[#F5C518] font-medium transition-colors">Login</motion.button>
+              <motion.button whileHover={{ y: -2 }} onClick={() => onNavigate('landing')} className="text-white hover:text-[#F5C518] font-medium transition-colors cursor-pointer">Home</motion.button>
+              <motion.button whileHover={{ y: -2 }} onClick={() => onNavigate('about')} className="text-gray-400 hover:text-[#F5C518] font-medium transition-colors cursor-pointer">About</motion.button>
+              <motion.button whileHover={{ y: -2 }} onClick={() => onNavigate('login')} className="text-gray-400 hover:text-[#F5C518] font-medium transition-colors cursor-pointer">Login</motion.button>
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('signup')} 
-                className="btn-primary text-sm shadow-xl shadow-[#F5C518]/20"
+                className="btn-primary text-sm shadow-xl shadow-[#F5C518]/20 cursor-pointer"
               >
                 Sign Up
               </motion.button>
             </div>
 
             {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-2 text-white cursor-pointer" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -162,12 +170,26 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
       </motion.nav>
 
       {/* Hero Section - Black Theme with Parallax */}
-      <section className="relative overflow-hidden bg-[#1A1A1A]">
-        {/* Parallax Background Image */}
-        <motion.div className="absolute inset-0" style={{ y: heroY }}>
-          <img src="/site_images/Whisk_55817d435f9f27abdae4a455becaa0ebeg.png" alt="Background" className="w-full h-[120%] object-cover -top-[10%]" />
-          <div className="absolute inset-0 bg-black/75"></div>
+      <section className="relative overflow-hidden bg-[#1A1A1A] min-h-[90vh] flex items-center justify-center">
+        {/* Parallax Cinematic Video Background */}
+        <motion.div className="absolute inset-0 z-0 pointer-events-none" style={{ y: heroY }}>
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-[140%] object-cover absolute -top-[20%] left-0 opacity-40 scale-105"
+            poster="/site_images/Whisk_55817d435f9f27abdae4a455becaa0ebeg.png"
+          >
+            <source src="https://videos.pexels.com/video-files/3205807/3205807-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/70 to-[#1A1A1A]/40 mix-blend-multiply" />
         </motion.div>
+
+        {/* 3D Interactive Spline Object */}
+        <div className="absolute inset-0 z-10 hidden lg:block opacity-60">
+          <Spline scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode" />
+        </div>
 
         {/* Floating Glass Cards */}
         <motion.div 
@@ -179,7 +201,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             <span className="text-xl">🎉</span>
           </div>
           <div>
-            <p className="text-white font-medium text-sm">Aman hired as Cafe Staff</p>
+            <p className="text-white font-medium text-sm">Amal hired as Cafe Staff</p>
             <p className="text-gray-400 text-xs">Kochi • Just now</p>
           </div>
         </motion.div>
@@ -339,9 +361,25 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                 whileHover={{ y: -10 }}
                 className="bg-[#FFFBF0] rounded-3xl p-8 border border-orange-50/50 shadow-xl shadow-orange-900/5 group"
               >
-                <div className={`w-16 h-16 ${feature.bg} rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                  <feature.icon className={`w-8 h-8 ${feature.color}`} />
-                </div>
+                {/* Complex Lottie-like Hover Animation */}
+                <motion.div 
+                  className={`relative w-16 h-16 ${feature.bg} rounded-2xl flex items-center justify-center mb-6`}
+                  whileHover="hover"
+                >
+                  <motion.div 
+                    className={`absolute inset-0 rounded-2xl border-2 ${feature.color.replace('text-', 'border-')} opacity-0`}
+                    variants={{
+                      hover: { scale: [1, 1.4], opacity: [0.8, 0], transition: { duration: 1, repeat: Infinity } }
+                    }}
+                  />
+                  <motion.div 
+                    variants={{
+                      hover: { rotate: [0, -15, 15, -15, 15, 0], scale: 1.15, transition: { duration: 0.6 } }
+                    }}
+                  >
+                    <feature.icon className={`w-8 h-8 ${feature.color} relative z-10`} />
+                  </motion.div>
+                </motion.div>
                 <h3 className="text-2xl font-bold text-[#1A1A1A] mb-4">{feature.title}</h3>
                 <p className="text-gray-600 text-lg leading-relaxed">
                   {feature.desc}
@@ -420,9 +458,23 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 bg-[#FFFBF0]">
+      <section ref={howItWorksRef} className="py-32 bg-[#FFFBF0] relative overflow-hidden">
+        {/* Animated SVG Path connecting the dots */}
+        <div className="absolute inset-0 pointer-events-none z-0 hidden md:block" style={{ top: '40%' }}>
+          <svg className="w-full h-24" preserveAspectRatio="none">
+            <motion.path
+              d="M 100,50 Q 300,-50 500,50 T 900,50"
+              fill="transparent"
+              stroke="#F5C518"
+              strokeWidth="4"
+              strokeDasharray="10 10"
+              style={{ pathLength: pathProgress }}
+            />
+          </svg>
+        </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20 relative z-10">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               className="text-3xl md:text-5xl font-extrabold text-[#1A1A1A] mb-6"
@@ -434,9 +486,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-12 relative">
-            <div className="hidden md:block absolute top-[45px] left-[20%] right-[20%] h-0.5 bg-gray-200" />
-            
+          <div className="grid md:grid-cols-3 gap-12 relative z-10">
             {[
               { icon: Search, title: "SEARCH", desc: "Find local jobs near you. Use our smart map to see what's happening in your neighborhood." },
               { icon: Briefcase, title: "APPLY", desc: "Quick application with one tap. No complicated forms—just your profile and your interest." },
@@ -521,6 +571,51 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Dynamic Student Success Stories Carousel */}
+      <section className="py-24 bg-[#1A1A1A] overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+              Student <span className="text-[#F5C518]">Success Stories</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Hear from students across Kerala who found their perfect gig.</p>
+          </motion.div>
+        </div>
+
+        <div className="ml-4 sm:ml-6 lg:ml-8 pl-0">
+          <motion.div 
+            drag="x"
+            dragConstraints={{ right: 0, left: -800 }}
+            className="flex gap-6 cursor-grab active:cursor-grabbing pb-8 pr-8"
+          >
+            {[
+              { name: "Arjun K.", role: "Library Assistant", city: "Trivandrum", quote: "I was struggling to find a job that fit my university schedule. AfterBell matched me with a role just 2km from my hostel." },
+              { name: "Meera Nair", role: "Part-time Tutor", city: "Kochi", quote: "The verification process made me feel incredibly safe. Now I teach math every weekend and earn enough for all my expenses!" },
+              { name: "Vishnu Pillai", role: "Cafe Staff", city: "Kozhikode", quote: "Got hired within 24 hours of uploading my profile. The interactive map is a game changer for finding hyper-local jobs." },
+              { name: "Sneha P.", role: "Retail Helper", city: "Thrissur", quote: "No more waiting weeks for callbacks. The instant messaging with employers directly on AfterBell is fantastic." }
+            ].map((story, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="w-[350px] md:w-[450px] shrink-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+              >
+                <Quote className="absolute top-6 right-6 w-12 h-12 text-[#F5C518]/20" />
+                <p className="text-gray-300 text-lg mb-8 leading-relaxed relative z-10">"{story.quote}"</p>
+                <div className="flex items-center gap-4 relative z-10">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#F5C518] to-orange-500 rounded-full flex items-center justify-center text-xl font-bold text-[#1A1A1A]">
+                    {story.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold">{story.name}</h4>
+                    <p className="text-gray-400 text-sm">{story.role} • {story.city}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
