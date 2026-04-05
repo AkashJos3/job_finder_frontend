@@ -211,14 +211,19 @@ function App() {
   };
 
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
-      if (session) {
-        fetchUserProfile(session.user.id).finally(() => setAuthLoading(false));
-      } else {
+    // Check active session with catch block to prevent infinite loading
+    supabase.auth.getSession()
+      .then(({ data: { session } }: any) => {
+        if (session) {
+          fetchUserProfile(session.user.id).finally(() => setAuthLoading(false));
+        } else {
+          setAuthLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Auth session error:", err);
         setAuthLoading(false);
-      }
-    });
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event: string, session: any) => {
@@ -234,27 +239,36 @@ function App() {
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
-    const { data } = await supabase.from('profiles').select('role').eq('id', userId).single();
+    try {
+      const { data, error } = await supabase.from('profiles').select('role').eq('id', userId).single();
 
-    if (!data) {
-      showGlobalToast('Profile not found. Please complete sign-up first.', 'error');
-      await supabase.auth.signOut();
-      handleLogoutLocal();
-      return;
-    }
+      if (error) throw error;
 
-    if (data && data.role === 'banned') {
-      showGlobalToast('Your account has been banned due to policy violations.', 'error');
-      await handleLogout();
-      return;
-    }
-    if (data && data.role) {
-      setUserRole(data.role as UserRole);
-      // We don't auto-navigate here to avoid overriding user's deep links, unless they're currently on landing/login
-      const current = viewRef.current;
-      if (current === 'landing' || current === 'login' || current === 'signup' || current === 'employer-signup' || current === 'student-signup') {
-        handleLoginNavigation(data.role as UserRole);
+      if (!data) {
+        showGlobalToast('Profile not found. Please complete sign-up first.', 'error');
+        await supabase.auth.signOut();
+        handleLogoutLocal();
+        return;
       }
+
+      if (data && data.role === 'banned') {
+        showGlobalToast('Your account has been banned due to policy violations.', 'error');
+        await handleLogout();
+        return;
+      }
+      
+      if (data && data.role) {
+        setUserRole(data.role as UserRole);
+        // We don't auto-navigate here to avoid overriding user's deep links, unless they're currently on landing/login
+        const current = viewRef.current;
+        if (current === 'landing' || current === 'login' || current === 'signup' || current === 'employer-signup' || current === 'student-signup') {
+          handleLoginNavigation(data.role as UserRole);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching user profile:", err);
+      // Force exit loading state on failure
+      setAuthLoading(false);
     }
   };
 
