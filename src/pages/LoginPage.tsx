@@ -24,14 +24,15 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
     const handleForgotPassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!forgotEmail) {
+        const safeForgotEmail = forgotEmail.trim().toLowerCase();
+        if (!safeForgotEmail) {
             setErrorMsg('Please enter your email address.');
             return;
         }
         setIsLoading(true);
         setErrorMsg('');
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+            const { error } = await supabase.auth.resetPasswordForEmail(safeForgotEmail, {
                 redirectTo: window.location.origin,
             });
             if (error) throw error;
@@ -45,13 +46,15 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email) {
+        const safeEmail = email.trim().toLowerCase();
+
+        if (!safeEmail) {
             setErrorMsg('Please enter an email address.');
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(safeEmail)) {
             setErrorMsg('Please enter a valid email address.');
             return;
         }
@@ -61,14 +64,14 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
         try {
             if (loginMethod === 'password') {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabase.auth.signInWithPassword({ email: safeEmail, password });
                 if (error) throw error;
                 await checkRoleAndLogin(data.user);
             } else if (loginMethod === 'otp' && !otpSent) {
                 const checkRes = await fetch(`${API_URL}/api/auth/check-email`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({ email: safeEmail })
                 });
 
                 if (!checkRes.ok) {
@@ -81,14 +84,14 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                 }
 
                 const { error } = await supabase.auth.signInWithOtp({
-                    email,
+                    email: safeEmail,
                     options: { shouldCreateUser: false },
                 });
                 if (error) throw error;
                 setOtpSent(true);
             } else if (loginMethod === 'otp' && otpSent) {
                 if (!otpCode) throw new Error('Please enter the OTP code.');
-                const { data, error } = await supabase.auth.verifyOtp({ email, token: otpCode, type: 'email' });
+                const { data, error } = await supabase.auth.verifyOtp({ email: safeEmail, token: otpCode, type: 'email' });
                 if (error) throw error;
                 await checkRoleAndLogin(data.user);
             }

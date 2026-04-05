@@ -40,6 +40,8 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
     e.preventDefault();
     setErrorMsg('');
 
+    const safeEmail = email.trim().toLowerCase();
+
     // Validate password
     const pwdError = validatePassword(password);
     if (pwdError) {
@@ -48,7 +50,7 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(safeEmail)) {
       setErrorMsg('Please enter a valid email address.');
       return;
     }
@@ -57,7 +59,7 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: safeEmail,
         password,
       });
 
