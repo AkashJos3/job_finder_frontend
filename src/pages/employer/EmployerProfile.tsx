@@ -95,6 +95,11 @@ export function EmployerProfile({ onNavigate, onLogout }: EmployerProfileProps) 
 
   const handleSave = async () => {
     if (!isEditing) { setIsEditing(true); return; }
+
+    if (profileData.phone && profileData.phone.length !== 10) {
+      setSaveMsg('❌ Phone number must be exactly 10 digits');
+      return;
+    }
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
@@ -317,7 +322,7 @@ export function EmployerProfile({ onNavigate, onLogout }: EmployerProfileProps) 
                     <input
                       type="tel"
                       value={profileData.phone}
-                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value.replace(/\D/g, '') })}
                       disabled={!isEditing}
                       className="bg-transparent flex-1 focus:outline-none disabled:text-gray-600 dark:disabled:text-gray-400 dark:text-white"
                     />

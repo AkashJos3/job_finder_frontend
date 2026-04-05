@@ -50,6 +50,12 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setErrorMsg('Please enter a valid email address.');
+            return;
+        }
+
         setIsLoading(true);
         setErrorMsg('');
 
@@ -180,7 +186,7 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                                             <input
                                                 type="email"
                                                 value={forgotEmail}
-                                                onChange={(e) => setForgotEmail(e.target.value)}
+                                                onChange={(e) => setForgotEmail(e.target.value.trim().toLowerCase())}
                                                 placeholder="you@university.edu"
                                                 className="w-full px-4 py-3 border border-gray-200 bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] focus:border-transparent transition-all duration-200 pl-12"
                                                 required
@@ -219,7 +225,7 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                                         <input
                                             type="email"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
                                             placeholder="you@university.edu"
                                             className="w-full px-4 py-3 border border-gray-200 bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] focus:border-transparent transition-all duration-200 pl-12"
                                             required
