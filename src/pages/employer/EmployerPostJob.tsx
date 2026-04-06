@@ -1,7 +1,7 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, ChevronLeft, Upload, Camera, Check, Flame, MapPin, Clock, IndianRupee, Eye, Briefcase, Shield
+  Bell, ChevronLeft, Upload, Camera, Check, Flame, MapPin, Clock, IndianRupee, Eye, Briefcase, Shield, Users
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
@@ -22,6 +22,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
   const [jobTitle, setJobTitle] = useState('');
   const [description, setDescription] = useState('');
   const [wage, setWage] = useState('');
+  const [vacancies, setVacancies] = useState('1');
   const [timing, setTiming] = useState('');
   const [location, setLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -156,6 +157,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
           urgent: isUrgent,
           requirements: timing,
           image_url: shopImage,
+          vacancies: parseInt(vacancies) || 1,
         })
       });
 
@@ -283,8 +285,8 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                         </p>
                       </div>
 
-                      {/* Wage and Timing */}
-                      <div className="grid md:grid-cols-2 gap-6">
+                      {/* Wage, Timing, Vacancies */}
+                      <div className="grid md:grid-cols-3 gap-6">
                         <div>
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
                             Wage (₹ per day)
@@ -312,6 +314,22 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                               value={timing}
                               onChange={(e) => setTiming(e.target.value)}
                               placeholder="e.g. Mon-Fri after 4pm"
+                              className="input-field pl-12 dark:bg-[#1A1A1A] dark:border-gray-700 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
+                            Number of people needed
+                          </label>
+                          <div className="relative">
+                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                            <input
+                              type="number"
+                              min="1"
+                              value={vacancies}
+                              onChange={(e) => setVacancies(e.target.value)}
+                              placeholder="1"
                               className="input-field pl-12 dark:bg-[#1A1A1A] dark:border-gray-700 dark:text-white"
                             />
                           </div>

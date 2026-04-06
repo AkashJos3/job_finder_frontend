@@ -6,7 +6,6 @@ import {
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
-import { NotificationBell } from '../../components/layout/NotificationBell';
 
 interface EmployerMyJobsProps {
   onNavigate: (view: PageView) => void;
@@ -325,7 +324,6 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
               >
                 + Post New Job
               </button>
-              <NotificationBell />
             </div>
           </div>
         </header>
@@ -440,7 +438,7 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
                           className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                         >
                           <Users className="w-4 h-4" />
-                          {job.applications?.[0]?.count || 0} Candidates
+                          {job.applications?.[0]?.count || 0} Candidates (Need {job.vacancies || 1})
                         </button>
                         <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                           Posted {new Date(job.created_at).toLocaleDateString('en-IN')}

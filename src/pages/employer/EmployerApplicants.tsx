@@ -134,8 +134,13 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
         body: JSON.stringify({ application_id: id, status: action })
       });
       if (res.ok) {
+        const data = await res.json();
         fetchApplications();
-        showToast(`Application ${action} successfully!`, 'success');
+        if (data.auto_closed) {
+          showToast(`Target Reached: Job Auto-Closed! 🎉`, 'success');
+        } else {
+          showToast(`Application ${action} successfully!`, 'success');
+        }
         if (action === 'accepted') {
           setShowConfetti(true);
           setTimeout(() => setShowConfetti(false), 4000);
@@ -204,17 +209,8 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200 relative">
-      {showConfetti && (
-        <ReactConfetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-          gravity={0.15}
-          style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
-        />
-      )}
+    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <EmployerSidebar activeView="employer-applicants" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Toast Notification */}
@@ -346,7 +342,7 @@ export function EmployerApplicants({ onNavigate, onLogout, onMessageStudent }: E
               const location = applicant.jobs?.location || 'Remote/Campus';
 
               return (
-                <div key={applicant.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-300 border border-transparent dark:border-gray-800 hover:-translate-y-1 group">
+                <div key={applicant.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow hover:card-shadow-hover transition-all duration-300 border border-transparent dark:border-gray-800">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
