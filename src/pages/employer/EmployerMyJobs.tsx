@@ -1,7 +1,7 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, MapPin, IndianRupee, Clock, Eye, Edit, Trash2, Search, Briefcase, Users, X, Save
+  Bell, MapPin, IndianRupee, Clock, Eye, Edit, Trash2, Search, Briefcase, Users, X, Save, MessageSquare
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
@@ -30,6 +30,9 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
   const [saveMsg, setSaveMsg] = useState('');
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  // Pause reason modal
+  const [pauseModal, setPauseModal] = useState<{ jobId: string; jobTitle: string } | null>(null);
+  const [pauseReason, setPauseReason] = useState('');
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -74,18 +77,31 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
     }
   };
 
-  const handleToggleStatus = async (jobId: string, currentStatus: string) => {
+  const handleToggleStatus = async (jobId: string, currentStatus: string, reason?: string) => {
     const nextStatus = currentStatus === 'open' ? 'closed' : 'open';
+    
+    // If pausing and no reason provided yet, show the modal
+    if (nextStatus === 'closed' && reason === undefined) {
+      const job = myJobs.find(j => j.id === jobId);
+      setPauseModal({ jobId, jobTitle: job?.title || 'this job' });
+      setPauseReason('');
+      return;
+    }
+    
     // Optimistically update UI immediately
-    setMyJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus } : j));
+    setMyJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: nextStatus, pause_reason: reason || null } : j));
     setTogglingIds(prev => new Set(prev).add(jobId));
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { showToast('Not logged in', 'error'); return; }
+      const body: any = { status: nextStatus };
+      if (nextStatus === 'closed' && reason) {
+        body.pause_reason = reason;
+      }
       const res = await fetch(`${API_URL}/api/jobs/${jobId}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus })
+        body: JSON.stringify(body)
       });
       if (res.ok) {
         showToast(nextStatus !== 'open' ? 'Job paused successfully' : 'Job re-opened successfully', 'success');
@@ -518,6 +534,66 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
           </p>
         </footer>
       </main>
+
+      {/* Pause Reason Modal */}
+      {pauseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setPauseModal(null)}
+          />
+          <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-3xl w-full max-w-md relative z-10 p-8 shadow-2xl">
+            <button
+              onClick={() => setPauseModal(null)}
+              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors"
+            >
+              <X className="w-4 h-4 text-gray-500" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white">Pause Job</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">"{pauseModal.jobTitle}"</p>
+              </div>
+            </div>
+
+            <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
+              Why are you pausing this job? <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              value={pauseReason}
+              onChange={(e) => setPauseReason(e.target.value)}
+              placeholder="e.g. We got too many applicants, we'll reopen next week..."
+              rows={3}
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#F5C518] focus:border-transparent outline-none resize-none transition-all"
+            />
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 mb-5">
+              Students who applied will see this reason on their applications page.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPauseModal(null)}
+                className="flex-1 py-3 border border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleToggleStatus(pauseModal.jobId, 'open', pauseReason || 'No reason provided');
+                  setPauseModal(null);
+                }}
+                className="flex-1 py-3 bg-[#F5C518] text-[#1A1A1A] rounded-xl font-bold hover:bg-[#e0b416] transition-colors shadow-lg shadow-[#F5C518]/20"
+              >
+                Pause Job
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

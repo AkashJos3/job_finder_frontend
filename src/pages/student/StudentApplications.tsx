@@ -1,14 +1,13 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Bell, Search, MapPin, Filter, ChevronRight, Plus, Calendar, Clock, Video, CheckCircle, XCircle
+  Bell, Search, MapPin, Filter, ChevronRight, Plus, Calendar, Clock, Video, CheckCircle, XCircle, AlertTriangle
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
-import { NotificationBell } from '../../components/layout/NotificationBell';
 
 interface StudentApplicationsProps {
   onNavigate: (view: PageView) => void;
@@ -74,48 +73,6 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
     }
   };
 
-  const handleDeclineInterview = async (applicationId: string) => {
-    if (!window.confirm('Are you sure you want to decline this interview?')) return;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const res = await fetch(`${API_URL}/api/applications/${applicationId}/decline_interview`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${session.access_token}` }
-      });
-      if (res.ok) {
-        showToast('Interview declined.', 'success');
-        fetchApplications();
-      } else {
-        const err = await res.json();
-        showToast(err.error || 'Failed to decline interview', 'error');
-      }
-    } catch (e) {
-      showToast('Network error. Please try again.', 'error');
-    }
-  };
-
-  const handleWithdraw = async (applicationId: string) => {
-    if (!window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) return;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const res = await fetch(`${API_URL}/api/applications/${applicationId}/withdraw`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${session.access_token}` }
-      });
-      if (res.ok) {
-        showToast('Application withdrawn successfully.', 'success');
-        fetchApplications();
-      } else {
-        const err = await res.json();
-        showToast(err.message || err.error || 'Failed to withdraw', 'error');
-      }
-    } catch (e) {
-      showToast('Network error. Please try again.', 'error');
-    }
-  };
-
   const applications = {
     applied: appsData.filter(a => ['pending', 'Pending'].includes(a.status)),
     interview: appsData.filter(a => ['interview', 'Interview'].includes(a.status)),
@@ -155,17 +112,8 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200 relative">
-      {showConfetti && (
-        <ReactConfetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-          gravity={0.15}
-          style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
-        />
-      )}
+    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       {toast && (
         <div className={`fixed top-6 right-6 z-[999] px-5 py-3.5 rounded-xl shadow-lg text-white font-medium text-sm transition-all duration-300 ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
           {toast.msg}
@@ -200,7 +148,6 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                 </button>
               </div>
             </div>
-            <NotificationBell />
           </div>
         </header>
 
@@ -248,7 +195,7 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
               const { statusLabel, statusColor, icon, iconBg } = getAppCardProps(app);
               const jobDetails = app.jobs || {};
               const companyName = jobDetails.company_name || jobDetails.profiles?.full_name || 'Unknown Company';
-              const avatarUrl = jobDetails.image_url || jobDetails.profiles?.avatar_url;
+              const avatarUrl = jobDetails.profiles?.avatar_url;
 
               return (
                 <div key={app.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow hover:card-shadow-hover border border-transparent dark:border-gray-800 transition-all duration-300">
@@ -268,8 +215,16 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
 
                   {/* Job Paused Banner */}
                   {(jobDetails.status === 'closed' || jobDetails.status === 'paused') && (
-                    <div className="mb-2 flex items-center gap-1.5 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-semibold">
-                      ⏸ This job is currently paused by the employer
+                    <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
+                      <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 text-xs font-semibold mb-1">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        Job Paused by Employer
+                      </div>
+                      {jobDetails.pause_reason && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400/80 italic">
+                          "{jobDetails.pause_reason}"
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -305,7 +260,10 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                           <CheckCircle className="w-4 h-4" /> Accept
                         </button>
                         <button
-                          onClick={() => handleDeclineInterview(app.id)}
+                          onClick={() => {
+                            // Declining just shows a message — no backend action needed
+                            showToast('You can message the employer to reschedule.', 'error');
+                          }}
                           className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
                         >
                           <XCircle className="w-4 h-4" /> Decline
@@ -316,23 +274,13 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
                     <span className="text-sm text-gray-400 dark:text-gray-500">Applied {new Date(app.created_at).toLocaleDateString()}</span>
-                    <div className="flex items-center gap-3">
-                      {['pending', 'Pending'].includes(app.status) && (
-                        <button
-                          onClick={() => handleWithdraw(app.id)}
-                          className="text-red-500 hover:text-red-600 font-semibold text-sm transition-colors"
-                        >
-                          Withdraw
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setSelectedApp(app)}
-                        className="text-[#F5C518] font-semibold text-sm flex items-center gap-1 hover:underline"
-                      >
-                        View Details
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setSelectedApp(app)}
+                      className="text-[#F5C518] font-semibold text-sm flex items-center gap-1 hover:underline"
+                    >
+                      View Details
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               );
@@ -358,6 +306,26 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
             )}
           </div>
 
+          {/* Pagination */}
+          {currentApplications.length > 0 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-white transition-colors">
+                <ChevronRight className="w-4 h-4 rotate-180" />
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#F5C518] text-[#1A1A1A] font-semibold">
+                1
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-white transition-colors">
+                2
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-white transition-colors">
+                3
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-white transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -420,9 +388,20 @@ export function StudentApplications({ onNavigate, onLogout }: StudentApplication
                 </div>
               )}
               {(selectedApp.jobs?.status === 'closed' || selectedApp.jobs?.status === 'paused') && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 p-4 rounded-xl text-sm mt-4 flex items-start gap-2">
-                  <span className="text-lg">⏸</span>
-                  <span><strong>Job Paused:</strong> The employer has temporarily paused this job listing. Your application is still saved and will be reviewed when the job reopens.</span>
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 p-4 rounded-xl text-sm mt-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Job Paused</strong>
+                      {selectedApp.jobs?.pause_reason ? (
+                        <p className="mt-1 text-amber-600 dark:text-amber-400/80">
+                          Employer's reason: <em>"{selectedApp.jobs.pause_reason}"</em>
+                        </p>
+                      ) : (
+                        <p className="mt-1">The employer has temporarily paused this job listing. Your application is still saved and will be reviewed when the job reopens.</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
