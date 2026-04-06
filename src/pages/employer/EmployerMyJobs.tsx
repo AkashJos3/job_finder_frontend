@@ -24,7 +24,7 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
   // Edit modal
   const [editJob, setEditJob] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({
-    title: '', location: '', description: '', wage: '', requirements: ''
+    title: '', location: '', description: '', wage: '', requirements: '', vacancies: '1'
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -128,6 +128,7 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
       description: job.description || '',
       wage: job.wage || '',
       requirements: job.requirements || '',
+      vacancies: String(job.vacancies || 1),
     });
     setSaveMsg('');
   };
@@ -139,10 +140,19 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
+      const payload: any = { ...editForm };
+      // Convert vacancies to integer for backend
+      if (payload.vacancies) {
+        payload.vacancies = parseInt(payload.vacancies) || 1;
+      }
+      // If employer increased vacancies on a closed job, also re-open it
+      if (editJob.status === 'closed' && payload.vacancies > (editJob.vacancies || 1)) {
+        payload.status = 'open';
+      }
       const res = await fetch(`${API_URL}/api/jobs/${editJob.id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setSaveMsg('✅ Job updated successfully!');
@@ -266,15 +276,31 @@ export function EmployerMyJobs({ onNavigate, onLogout }: EmployerMyJobsProps) {
                 />
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Saving will auto-update the job's map coordinates</p>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-1">Wage (₹/day)</label>
-                <input
-                  type="text"
-                  value={editForm.wage}
-                  onChange={e => setEditForm(f => ({ ...f, wage: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] transition-colors"
-                  placeholder="e.g. 500"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-1">Wage (₹/day)</label>
+                  <input
+                    type="text"
+                    value={editForm.wage}
+                    onChange={e => setEditForm(f => ({ ...f, wage: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] transition-colors"
+                    placeholder="e.g. 500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-300 mb-1">People Needed</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editForm.vacancies}
+                    onChange={e => setEditForm(f => ({ ...f, vacancies: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2D2D2D] text-[#1A1A1A] dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] transition-colors"
+                    placeholder="1"
+                  />
+                  {editJob?.status === 'closed' && parseInt(editForm.vacancies) > (editJob?.vacancies || 1) && (
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">💡 Increasing this will re-open the job automatically!</p>
+                  )}
+                </div>
               </div>
 
               <div>
