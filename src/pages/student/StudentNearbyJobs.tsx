@@ -40,7 +40,7 @@ interface StudentNearbyJobsProps {
 }
 
 export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, setGlobalSearchQuery }: StudentNearbyJobsProps) {
-  const [radius, setRadius] = useState<'1' | '3' | '5'>('3');
+  const [radius, setRadius] = useState<'1' | '3' | '5' | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState(globalSearchQuery);
 
   const [jobs, setJobs] = useState<any[]>([]);
@@ -256,15 +256,15 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
       (job.company_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (job.location || '').toLowerCase().includes(searchQuery.toLowerCase());
       
-    const matchesDistance = job.distance_km === undefined || job.distance_km <= parseInt(radius);
+    const matchesDistance = radius === 'all' || job.distance_km === undefined || job.distance_km <= parseInt(radius);
     
     return matchesSearch && matchesDistance;
   });
 
   // Separate into nearby vs other for informational display
-  const nearbyCount = filteredJobs.filter(job =>
-    job.distance_km !== undefined && job.distance_km <= parseInt(radius)
-  ).length;
+  const nearbyCount = radius === 'all' 
+    ? filteredJobs.length 
+    : filteredJobs.filter(job => job.distance_km !== undefined && job.distance_km <= parseInt(radius)).length;
 
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
@@ -329,14 +329,14 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
               <h1 className="text-3xl font-bold text-[#1A1A1A] dark:text-white mb-1">Find Jobs</h1>
               <p className="text-gray-500 dark:text-gray-400">
                 {filteredJobs.length} open jobs available
-                {userLocation && nearbyCount > 0 && (
+                {userLocation && nearbyCount > 0 && radius !== 'all' && (
                   <span className="ml-2 text-[#F5C518] font-medium">· {nearbyCount} within {radius} km</span>
                 )}
               </p>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 max-w-full">
               <span className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide flex-shrink-0">Map Radius</span>
-              {(['1', '3', '5'] as const).map((r) => (
+              {(['all', '1', '3', '5'] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => setRadius(r)}
@@ -345,7 +345,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                     : 'bg-white dark:bg-[#2D2D2D] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                 >
-                  {r} km
+                  {r === 'all' ? 'All' : `${r} km`}
                 </button>
               ))}
             </div>
@@ -394,11 +394,13 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                         <Marker position={userLocation} icon={userIcon}>
                           <Popup><strong>📍 You are here</strong></Popup>
                         </Marker>
-                        <Circle
-                          center={userLocation}
-                          radius={parseInt(radius) * 1000}
-                          pathOptions={{ color: '#F5C518', fillColor: '#F5C518', fillOpacity: 0.08, weight: 2 }}
-                        />
+                        {radius !== 'all' && (
+                          <Circle
+                            center={userLocation}
+                            radius={parseInt(radius) * 1000}
+                            pathOptions={{ color: '#F5C518', fillColor: '#F5C518', fillOpacity: 0.08, weight: 2 }}
+                          />
+                        )}
                       </>
                     )}
 
@@ -431,9 +433,14 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                 )}
                 {userLocation && (
                   <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                    <p className="text-xs text-green-700 dark:text-green-400 font-semibold uppercase tracking-wide">Map showing {radius} km radius</p>
+                    <p className="text-xs text-green-700 dark:text-green-400 font-semibold uppercase tracking-wide">
+                      {radius === 'all' ? 'Map showing all jobs' : `Map showing ${radius} km radius`}
+                    </p>
                     <p className="text-sm text-[#1A1A1A] dark:text-white font-medium">
-                      {nearbyCount > 0 ? `${nearbyCount} job${nearbyCount !== 1 ? 's' : ''} within ${radius} km` : 'No jobs within radius'}
+                      {radius === 'all' 
+                        ? `Showing all ${nearbyCount} available jobs` 
+                        : (nearbyCount > 0 ? `${nearbyCount} job${nearbyCount !== 1 ? 's' : ''} within ${radius} km` : 'No jobs within radius')
+                      }
                     </p>
                   </div>
                 )}
