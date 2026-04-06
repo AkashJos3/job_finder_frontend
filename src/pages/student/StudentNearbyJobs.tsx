@@ -8,7 +8,6 @@ import ReactConfetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
-import { NotificationBell } from '../../components/layout/NotificationBell';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -51,7 +50,6 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [visibleJobCount, setVisibleJobCount] = useState(6);
   const { width, height } = useWindowSize();
 
   // Toast notification state
@@ -64,7 +62,6 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   // Report modal state
   const [reportJobId, setReportJobId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
-  const [reportSeverity, setReportSeverity] = useState<'low' | 'medium' | 'high'>('medium');
 
   // Sync search query changes back to global state
   useEffect(() => {
@@ -198,7 +195,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ job_id: reportJobId, reason: reportReason, severity: reportSeverity })
+        body: JSON.stringify({ job_id: reportJobId, reason: reportReason })
       });
 
       if (response.ok) {
@@ -213,7 +210,6 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
     } finally {
       setReportJobId(null);
       setReportReason('');
-      setReportSeverity('medium');
     }
   };
 
@@ -253,12 +249,16 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
     }
   };
 
-  // Show ALL open jobs matching search — radius only affects the map circle, NOT the list
+  // Show jobs matching search AND within the selected distance radius
   const filteredJobs = jobs.filter(job => {
-    return searchQuery === '' ||
+    const matchesSearch = searchQuery === '' ||
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (job.company_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (job.location || '').toLowerCase().includes(searchQuery.toLowerCase());
+      
+    const matchesDistance = job.distance_km === undefined || job.distance_km <= parseInt(radius);
+    
+    return matchesSearch && matchesDistance;
   });
 
   // Separate into nearby vs other for informational display
@@ -267,17 +267,8 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200 relative">
-      {showConfetti && (
-        <ReactConfetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-          gravity={0.15}
-          style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
-        />
-      )}
+    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <StudentSidebar activeView="student-jobs" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Toast Notification */}
@@ -326,7 +317,6 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1A1A1A] text-[#1A1A1A] dark:text-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#F5C518] w-full md:w-56 transition-colors duration-200"
                 />
               </div>
-              <NotificationBell />
             </div>
           </div>
         </header>
@@ -443,7 +433,7 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                   <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
                     <p className="text-xs text-green-700 dark:text-green-400 font-semibold uppercase tracking-wide">Map showing {radius} km radius</p>
                     <p className="text-sm text-[#1A1A1A] dark:text-white font-medium">
-                      {nearbyCount > 0 ? `${nearbyCount} job${nearbyCount !== 1 ? 's' : ''} within ${radius} km` : 'No jobs within radius — all jobs still shown below'}
+                      {nearbyCount > 0 ? `${nearbyCount} job${nearbyCount !== 1 ? 's' : ''} within ${radius} km` : 'No jobs within radius'}
                     </p>
                   </div>
                 )}
@@ -486,17 +476,13 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                 ))}
               </div>
             ) : filteredJobs.length > 0 ? (
-              filteredJobs.slice(0, visibleJobCount).map((job) => (
+              filteredJobs.map((job) => (
                 <div key={job.id} className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow border border-transparent dark:border-gray-800 hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      {job.image_url ? (
-                        <img src={job.image_url} alt={job.title} className="w-12 h-12 rounded-xl object-cover group-hover:scale-110 transition-transform" />
-                      ) : (
-                        <div className={`w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform`}>
-                          💼
-                        </div>
-                      )}
+                      <div className={`w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform`}>
+                        💼
+                      </div>
                       <div>
                         <h3 className="font-semibold text-[#1A1A1A] dark:text-white">{job.title}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{job.company_name}</p>
@@ -581,12 +567,9 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
           </div>
 
           {/* Load More */}
-          {filteredJobs.length > 0 && visibleJobCount < filteredJobs.length && (
+          {filteredJobs.length > 0 && (
             <div className="text-center mt-8">
-              <button
-                onClick={() => setVisibleJobCount(prev => prev + 6)}
-                className="px-8 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 font-medium hover:border-[#F5C518] hover:text-[#F5C518] dark:hover:border-[#F5C518] dark:hover:text-[#F5C518] transition-all duration-200"
-              >
+              <button className="px-8 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 font-medium hover:border-[#F5C518] hover:text-[#F5C518] dark:hover:border-[#F5C518] dark:hover:text-[#F5C518] transition-all duration-200">
                 LOAD MORE JOBS
               </button>
             </div>
@@ -670,33 +653,9 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
               rows={3}
               className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-gray-700 rounded-xl text-[#1A1A1A] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
             />
-            {/* Severity Selector */}
-            <div className="mt-4">
-              <label className="block text-sm font-semibold text-[#1A1A1A] dark:text-gray-200 mb-2">Severity Level</label>
-              <div className="flex gap-2">
-                {(['low', 'medium', 'high'] as const).map((level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    onClick={() => setReportSeverity(level)}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-all duration-200 ${
-                      reportSeverity === level
-                        ? level === 'low'
-                          ? 'bg-green-100 dark:bg-green-900/40 border-green-400 text-green-700 dark:text-green-400'
-                          : level === 'medium'
-                            ? 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-400 text-yellow-700 dark:text-yellow-400'
-                            : 'bg-red-100 dark:bg-red-900/40 border-red-400 text-red-700 dark:text-red-400'
-                        : 'bg-gray-50 dark:bg-[#1A1A1A] border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    {level.charAt(0).toUpperCase() + level.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => { setReportJobId(null); setReportReason(''); setReportSeverity('medium'); }}
+                onClick={() => { setReportJobId(null); setReportReason(''); }}
                 className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition-colors"
               >
                 Cancel
