@@ -106,6 +106,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
           if (parsedData.description) setDescription(parsedData.description);
           if (parsedData.wage) setWage(parsedData.wage);
           if (parsedData.requirements) setTiming(parsedData.requirements);
+          if (parsedData.location) setLocation(parsedData.location);
         } catch (err: any) {
           setErrorMsg('AI Parsing Error: ' + err.message);
         } finally {
@@ -176,17 +177,8 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200 relative">
-      {showConfetti && (
-        <ReactConfetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-          gravity={0.15}
-          style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
-        />
-      )}
+    <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
+      {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} />}
       <EmployerSidebar activeView="employer-postjob" onNavigate={onNavigate} onLogout={onLogout} />
 
       {/* Main Content */}
