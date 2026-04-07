@@ -129,13 +129,14 @@ export function validateEmail(rawEmail: string): EmailValidationResult {
   }
 
   // Validate each domain label
-  const labelRegex = /^[a-zA-Z0-9-]+$/;
+  // Note: We restrict numbers entirely in the domain part as per system constraints
+  const labelRegex = /^[a-zA-Z-]+$/;
   for (const label of labels) {
     if (!label) {
       return fail('Email domain contains empty labels (consecutive dots).');
     }
     if (!labelRegex.test(label)) {
-      return fail('Email domain contains invalid characters. Only letters, digits, and hyphens are allowed.');
+      return fail('Email domain cannot contain numbers or special characters (only letters and hyphens).');
     }
     if (label.startsWith('-') || label.endsWith('-')) {
       return fail('Email domain labels cannot start or end with a hyphen.');
