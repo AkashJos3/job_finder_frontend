@@ -24,15 +24,14 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
     const handleForgotPassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        const safeForgotEmail = forgotEmail.trim().toLowerCase();
-        if (!safeForgotEmail) {
+        if (!forgotEmail) {
             setErrorMsg('Please enter your email address.');
             return;
         }
         setIsLoading(true);
         setErrorMsg('');
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(safeForgotEmail, {
+            const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
                 redirectTo: window.location.origin,
             });
             if (error) throw error;
@@ -46,16 +45,8 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        const safeEmail = email.trim().toLowerCase();
-
-        if (!safeEmail) {
+        if (!email) {
             setErrorMsg('Please enter an email address.');
-            return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(safeEmail)) {
-            setErrorMsg('Please enter a valid email address.');
             return;
         }
 
@@ -64,34 +55,21 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
         try {
             if (loginMethod === 'password') {
-                const { data, error } = await supabase.auth.signInWithPassword({ email: safeEmail, password });
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 await checkRoleAndLogin(data.user);
             } else if (loginMethod === 'otp' && !otpSent) {
-                const checkRes = await fetch(`${API_URL}/api/auth/check-email`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: safeEmail })
-                });
 
-                if (!checkRes.ok) {
-                    throw new Error('Failed to verify account. Please try again later.');
-                }
-
-                const checkData = await checkRes.json();
-                if (!checkData.exists) {
-                    throw new Error('Account does not exist. Please create an account first.');
-                }
 
                 const { error } = await supabase.auth.signInWithOtp({
-                    email: safeEmail,
+                    email,
                     options: { shouldCreateUser: false },
                 });
                 if (error) throw error;
                 setOtpSent(true);
             } else if (loginMethod === 'otp' && otpSent) {
                 if (!otpCode) throw new Error('Please enter the OTP code.');
-                const { data, error } = await supabase.auth.verifyOtp({ email: safeEmail, token: otpCode, type: 'email' });
+                const { data, error } = await supabase.auth.verifyOtp({ email, token: otpCode, type: 'email' });
                 if (error) throw error;
                 await checkRoleAndLogin(data.user);
             }
@@ -189,7 +167,7 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                                             <input
                                                 type="email"
                                                 value={forgotEmail}
-                                                onChange={(e) => setForgotEmail(e.target.value.trim().toLowerCase())}
+                                                onChange={(e) => setForgotEmail(e.target.value)}
                                                 placeholder="you@university.edu"
                                                 className="w-full px-4 py-3 border border-gray-200 bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] focus:border-transparent transition-all duration-200 pl-12"
                                                 required
@@ -228,7 +206,7 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                                         <input
                                             type="email"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             placeholder="you@university.edu"
                                             className="w-full px-4 py-3 border border-gray-200 bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] focus:border-transparent transition-all duration-200 pl-12"
                                             required
