@@ -1,13 +1,13 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Clock, ChevronRight, Users, Eye, Calendar, MapPin, TrendingUp
+  Bell, Clock, ChevronRight, Users, Eye, Calendar, MapPin, TrendingUp
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
-import { NotificationBell } from '../../components/layout/NotificationBell';
+import { formatTime24to12 } from '../../lib/formatters';
 
 interface EmployerDashboardProps {
   onNavigate: (view: PageView) => void;
@@ -21,11 +21,27 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
   const [userInitials, setUserInitials] = useState('');
   const [recentApplications, setRecentApplications] = useState<any[]>([]);
   const [newAppsCount, setNewAppsCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotif, setShowNotif] = useState(false);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [todayShifts, setTodayShifts] = useState<any[]>([]);
   const [upcomingShiftsCount, setUpcomingShiftsCount] = useState(0);
   const [analyticsData, setAnalyticsData] = useState<any[]>([]);
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(true);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Close notification dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotif(false);
+      }
+    }
+    if (showNotif) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotif]);
 
   const todayISO = toISODate(new Date());
   const todayLabel = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -42,10 +58,31 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
           });
         fetchApplications(session.access_token);
         fetchShifts(session.access_token);
+        fetchNotifications(session.access_token);
         fetchAnalytics(session.access_token);
       }
     });
   }, []);
+
+  const fetchNotifications = async (token: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) { const j = await res.json(); setNotifications(j.data || []); }
+    } catch (e) { console.error(e); }
+  };
+
+  const markAsRead = async (notifId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      await fetch(`${API_URL}/api/notifications/${notifId}/read`, {
+        method: 'PUT', headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      fetchNotifications(session.access_token);
+    } catch (e) { console.error(e); }
+  };
 
   const fetchApplications = async (token: string) => {
     try {
@@ -99,6 +136,8 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
 
 
 
+  const unreadNotifCount = notifications.filter(n => !n.is_read).length;
+
   return (
     <div className="min-h-screen bg-[#FFFBF0] dark:bg-[#121212] flex transition-colors duration-200">
       <EmployerSidebar activeView="employer-dashboard" onNavigate={onNavigate} onLogout={onLogout} />
@@ -113,7 +152,42 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                 Welcome{userName ? `, ${userName.split(' ')[0]}` : ''}! <span className="text-[#F5C518]">👋</span>
               </h1>
             </div>
-            <NotificationBell />
+            {/* Notification bell only */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setShowNotif(!showNotif)}
+                className="w-10 h-10 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative"
+              >
+                <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-[#2D2D2D]" />
+                )}
+              </button>
+              {showNotif && (
+                <div className="fixed top-20 left-4 right-4 sm:absolute sm:top-12 sm:inset-auto sm:right-0 w-auto sm:w-80 max-w-sm bg-white dark:bg-[#2D2D2D] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                    <h3 className="font-bold text-[#1A1A1A] dark:text-white">Notifications</h3>
+                    {unreadNotifCount > 0 && (
+                      <span className="text-xs bg-[#F5C518] text-[#1A1A1A] px-2 py-1 rounded-full font-bold">{unreadNotifCount} New</span>
+                    )}
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No notifications yet</div>
+                    ) : notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        onClick={() => !notif.is_read && markAsRead(notif.id)}
+                        className={`p-4 border-b border-gray-50 dark:border-gray-800 cursor-pointer transition-colors ${notif.is_read ? 'bg-white dark:bg-[#2D2D2D] hover:bg-gray-50 dark:hover:bg-[#1A1A1A]' : 'bg-[#FFFBF0] dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
+                      >
+                        <p className={`text-sm break-words whitespace-pre-wrap ${notif.is_read ? 'text-gray-600 dark:text-gray-400' : 'text-[#1A1A1A] dark:text-white font-medium'}`}>{notif.message}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{new Date(notif.created_at).toLocaleDateString('en-IN')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -169,7 +243,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                   <TrendingUp className="w-5 h-5 text-[#F5C518]" />
                   Analytics Overview
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Applications (Last 7 Days)</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Job views vs Applications (Last 7 Days)</p>
               </div>
             </div>
             <div className="h-[300px] w-full">
@@ -182,6 +256,10 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analyticsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
+                      <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      </linearGradient>
                       <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
                         <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
@@ -194,6 +272,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#1A1A1A', color: '#fff' }}
                       itemStyle={{ fontSize: '14px', fontWeight: 500 }}
                     />
+                    <Area type="monotone" dataKey="views" name="Job Views" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
                     <Area type="monotone" dataKey="applications" name="Applications" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorApps)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -303,7 +382,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 bg-[#F5C518]/10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 text-center">
                         <Clock className="w-4 h-4 text-[#F5C518] mb-0.5" />
-                        <span className="text-xs font-bold text-[#1A1A1A] dark:text-white leading-none">{shift.start_time?.slice(0, 5)}</span>
+                        <span className="text-xs font-bold text-[#1A1A1A] dark:text-white leading-none">{formatTime24to12(shift.start_time)}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-[#1A1A1A] dark:text-white truncate">{shift.jobs?.title || 'Shift'}</p>
@@ -314,7 +393,7 @@ export function EmployerDashboard({ onNavigate, onLogout }: EmployerDashboardPro
                         )}
                         <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
                           <Clock className="w-3 h-3" />
-                          {shift.start_time?.slice(0, 5)} – {shift.end_time?.slice(0, 5)}
+                          {formatTime24to12(shift.start_time)} – {formatTime24to12(shift.end_time)}
                         </div>
                         {shift.profiles?.full_name ? (
                           <span className="inline-block mt-2 text-xs text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">

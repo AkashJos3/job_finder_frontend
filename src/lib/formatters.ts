@@ -24,3 +24,28 @@ export function getDateLabel(dateStr: string) {
   if (isYesterday) return 'Yesterday';
   return date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
 }
+
+// Convert "HH:MM" (e.g. "14:30") to user-friendly time (e.g. "2:30 PM")
+export function formatTime24to12(time24: string | undefined): string {
+  if (!time24) return '';
+  const [hourStr, minute] = time24.split(':');
+  if (!hourStr || !minute) return time24;
+  
+  let hour = parseInt(hourStr, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  hour = hour ? hour : 12; // the hour '0' should be '12'
+  
+  return `${hour}:${minute} ${ampm}`;
+}
+
+// Format a shift date to a friendly label (e.g. "Oct 12, 2026")
+export function formatShiftDate(dateStr: string | undefined): string {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}

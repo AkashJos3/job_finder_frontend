@@ -7,6 +7,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { StudentSidebar } from '../../components/layout/StudentSidebar';
+import { formatTime24to12 } from '../../lib/formatters';
 
 interface StudentScheduleProps {
   onNavigate: (view: PageView) => void;
@@ -311,7 +312,7 @@ export function StudentSchedule({ onNavigate, onLogout }: StudentScheduleProps) 
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4 text-gray-400" />
                               {shift.start_time
-                                ? `${shift.start_time.slice(0, 5)} – ${shift.end_time?.slice(0, 5) || ''}`
+                                ? `${formatTime24to12(shift.start_time)} – ${formatTime24to12(shift.end_time) || ''}`
                                 : 'Time not set'}
                             </div>
                             {shift.jobs?.location && (

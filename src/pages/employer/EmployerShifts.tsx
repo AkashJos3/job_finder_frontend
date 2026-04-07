@@ -6,6 +6,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
+import { formatTime24to12 } from '../../lib/formatters';
 
 interface EmployerShiftsProps {
   onNavigate: (view: PageView) => void;
@@ -423,9 +424,9 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
                     {/* Time block */}
                     <div className="w-28 flex-shrink-0 text-center bg-[#F5C518]/10 rounded-xl py-3 px-2">
                       <Clock className="w-4 h-4 text-[#F5C518] dark:text-[#F5C518] mx-auto mb-1" />
-                      <p className="text-sm font-bold text-[#1A1A1A] dark:text-white">{shift.start_time?.slice(0, 5)}</p>
+                      <p className="text-sm font-bold text-[#1A1A1A] dark:text-white">{formatTime24to12(shift.start_time)}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500">to</p>
-                      <p className="text-sm font-bold text-[#1A1A1A] dark:text-white">{shift.end_time?.slice(0, 5)}</p>
+                      <p className="text-sm font-bold text-[#1A1A1A] dark:text-white">{formatTime24to12(shift.end_time)}</p>
                     </div>
 
                     <div className="w-px bg-gray-200 dark:bg-gray-700 self-stretch" />
