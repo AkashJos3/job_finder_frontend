@@ -150,3 +150,43 @@ export function validateEmail(rawEmail: string): EmailValidationResult {
   // ✅ All checks passed
   return { valid: true, error: '', normalized };
 }
+
+/**
+ * Validate an Indian phone number.
+ * Allows optional +91 or 0 prefix.
+ * Main number must be exactly 10 digits starting with 6, 7, 8, or 9.
+ */
+export function validateIndianPhone(rawPhone: string): { valid: boolean; error: string; normalized: string } {
+  const fail = (error: string) => ({ valid: false, error, normalized: '' });
+  
+  const trimmed = rawPhone.trim();
+  if (!trimmed) {
+    return fail('Phone number is required.');
+  }
+
+  // Strip all spaces, dashes, and parentheses to get raw digits/plus
+  const cleaned = trimmed.replace(/[\s\-()]/g, '');
+
+  let numberPart = cleaned;
+
+  // Handle +91 prefix
+  if (cleaned.startsWith('+91')) {
+    numberPart = cleaned.substring(3);
+  } else if (cleaned.startsWith('0')) {
+    // Handle 0 prefix
+    numberPart = cleaned.substring(1);
+  }
+
+  // Ensure it's exactly 10 digits after stripping prefixes
+  if (!/^\d{10}$/.test(numberPart)) {
+    return fail('Phone number must be exactly 10 digits.');
+  }
+
+  // Indian numbers must start with 6, 7, 8, or 9
+  if (!/^[6-9]/.test(numberPart)) {
+    return fail('Invalid Indian phone number. Must start with 6, 7, 8, or 9.');
+  }
+
+  // Normalized format: we keep the standard +91 prefix for database consistency
+  return { valid: true, error: '', normalized: '+91' + numberPart };
+}

@@ -6,6 +6,7 @@ import {
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
+import { validateIndianPhone } from '../../lib/validators';
 
 interface EmployerSettingsProps {
   onNavigate: (view: PageView) => void;
@@ -26,6 +27,7 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
   const [verifStatus, setVerifStatus] = useState('Pending');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   // Profile Form State
   const [profileName, setProfileName] = useState('');
@@ -139,10 +141,20 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      // Save userPhone dynamically straight to auth metadata if it changed
+      // Validate phone dynamically before saving
+      let finalPhone = userPhone;
       if (userPhone && userPhone !== 'No phone registered') {
+        const phoneCheck = validateIndianPhone(userPhone);
+        if (!phoneCheck.valid) {
+          setPhoneError(phoneCheck.error);
+          setIsSubmitting(false);
+          return;
+        }
+        setPhoneError('');
+        finalPhone = phoneCheck.normalized;
+
         await supabase.auth.updateUser({
-          data: { phone: userPhone }
+          data: { phone: finalPhone }
         });
       }
 
@@ -420,26 +432,15 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                       )}
                     </div>
 
-                    {verifStatus === 'Rejected' ? (
-                      <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-center">
-                        <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
-                        <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Verification Rejected</h3>
-                        <p className="text-sm text-red-600 dark:text-red-300">
-                          Your verification request was reviewed and explicitly rejected by our compliance team. To protect the platform, further automated submissions are disabled for this account.
-                        </p>
-                        <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
-                          Please contact supportafterbell@gmail.com to resolve this manually.
-                        </p>
-                      </div>
-                    ) : attemptsCount >= 3 && verifStatus !== 'Verified' ? (
+                    {attemptsCount >= 3 && verifStatus !== 'Verified' ? (
                       <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl text-center">
                         <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
                         <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Maximum Attempts Reached</h3>
                         <p className="text-sm text-red-600 dark:text-red-300">
-                          Your verification requests have been rejected by the AI system multiple times. To protect the platform, further automated submissions are disabled for this account.
+                          Your verification requests have been rejected multiple times. To protect the platform, further automated submissions are disabled for this account.
                         </p>
                         <p className="text-sm text-red-600 dark:text-red-300 font-medium mt-4">
-                          Please contact supportafterbell@gmail.com to resolve this manually.
+                          Please contact support@afterbell.com to resolve this manually.
                         </p>
                       </div>
                     ) : (
@@ -461,10 +462,26 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                         <input
                           type="tel"
                           value={userPhone}
-                          onChange={(e) => setUserPhone(e.target.value)}
-                          className="w-full px-4 py-3 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] dark:text-white"
+                          onChange={(e) => {
+                            // Only allow digits, plus, and spaces to be typed
+                            const val = e.target.value.replace(/[^\d\s\+]/g, '');
+                            setUserPhone(val);
+                            if (phoneError) setPhoneError('');
+                          }}
+                          onBlur={() => {
+                            if (userPhone && userPhone !== 'No phone registered') {
+                                const check = validateIndianPhone(userPhone);
+                                if (!check.valid) setPhoneError(check.error);
+                                else { setPhoneError(''); setUserPhone(check.normalized); }
+                            }
+                          }}
+                          className={`w-full px-4 py-3 bg-white dark:bg-[#2D2D2D] border rounded-xl focus:outline-none focus:ring-2 dark:text-white ${phoneError ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 dark:border-gray-700 focus:ring-[#F5C518]'}`}
                         />
-                        <p className="text-xs text-gray-400 mt-1">Sourced from your account</p>
+                        {phoneError ? (
+                            <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                        ) : (
+                            <p className="text-xs text-gray-400 mt-1">Sourced from your account</p>
+                        )}
                       </div>
                     </div>
 
