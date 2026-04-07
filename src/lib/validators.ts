@@ -81,7 +81,12 @@ export function validateEmail(rawEmail: string): EmailValidationResult {
   const localPart = trimmed.substring(0, atIndex);
   const domainPart = trimmed.substring(atIndex + 1).toLowerCase();
 
-  // Normalize: keep local as-is, lowercase domain
+  // Reject uppercase letters anywhere in the email
+  if (/[A-Z]/.test(localPart)) {
+    return fail('Email must be in lowercase only. Capital letters are not allowed.');
+  }
+
+  // Normalize: lowercase everything
   const normalized = `${localPart}@${domainPart}`;
 
   if (!localPart) {
@@ -97,10 +102,10 @@ export function validateEmail(rawEmail: string): EmailValidationResult {
   }
 
   // ── Step 4: Local part rules ──
-  // Allowed characters: letters, digits, . _ % + -
-  const localRegex = /^[a-zA-Z0-9._%+-]+$/;
+  // Allowed characters: lowercase letters, digits, . _ % + -
+  const localRegex = /^[a-z0-9._%+-]+$/;
   if (!localRegex.test(localPart)) {
-    return fail('Email username contains invalid characters. Only letters, digits, and . _ % + - are allowed.');
+    return fail('Email username contains invalid characters. Only lowercase letters, digits, and . _ % + - are allowed.');
   }
 
   // No leading or trailing dot
