@@ -3,6 +3,7 @@ import type { PageView, UserRole } from '../App';
 import { Bell, Mail, Lock, Eye, EyeOff, MessageSquare } from 'lucide-react';
 import { API_URL } from '../lib/api';
 import { supabase } from '../lib/supabaseClient';
+import { validateEmail } from '../lib/validators';
 
 interface LoginPageProps {
     onNavigate: (view: PageView) => void;
@@ -18,6 +19,7 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
     const [otpCode, setOtpCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [forgotMode, setForgotMode] = useState(false);
     const [forgotEmail, setForgotEmail] = useState('');
     const [resetSent, setResetSent] = useState(false);
@@ -55,10 +57,26 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
 
         try {
             if (loginMethod === 'password') {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                // Validate email format before attempting login
+                const emailCheck = validateEmail(email);
+                if (!emailCheck.valid) {
+                    setEmailError(emailCheck.error);
+                    setIsLoading(false);
+                    return;
+                }
+                setEmailError('');
+                const { data, error } = await supabase.auth.signInWithPassword({ email: emailCheck.normalized, password });
                 if (error) throw error;
                 await checkRoleAndLogin(data.user);
             } else if (loginMethod === 'otp' && !otpSent) {
+                // Validate email format before sending OTP
+                const emailCheck = validateEmail(email);
+                if (!emailCheck.valid) {
+                    setEmailError(emailCheck.error);
+                    setIsLoading(false);
+                    return;
+                }
+                setEmailError('');
                 // Verify the email exists before sending OTP
                 const checkRes = await fetch(`${API_URL}/api/auth/check-email`, {
                     method: 'POST',
@@ -224,12 +242,14 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                                         <input
                                             type="email"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); }}
+                                            onBlur={() => { if (email) { const r = validateEmail(email); if (!r.valid) setEmailError(r.error); else setEmailError(''); } }}
                                             placeholder="you@university.edu"
-                                            className="w-full px-4 py-3 border border-gray-200 bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] focus:border-transparent transition-all duration-200 pl-12"
+                                            className={`w-full px-4 py-3 border bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 pl-12 ${emailError ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 focus:ring-[#F5C518]'}`}
                                             required
                                         />
                                     </div>
+                                    {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
                                 </div>
                             ) : (
                                 <div className="bg-green-50 rounded-xl p-4 flex items-start justify-between">

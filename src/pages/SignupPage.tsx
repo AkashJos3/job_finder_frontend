@@ -3,6 +3,7 @@ import type { PageView, UserRole } from '../App';
 import { Bell, User, Mail, Lock, Eye, EyeOff, GraduationCap, Building2, ArrowRight, CheckCircle } from 'lucide-react';
 
 import { supabase } from '../lib/supabaseClient';
+import { validateEmail } from '../lib/validators';
 
 interface SignUpPageProps {
   onNavigate: (view: PageView) => void;
@@ -18,6 +19,7 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [signedUp, setSignedUp] = useState(false);
 
   // Password Validation
@@ -40,8 +42,6 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
     e.preventDefault();
     setErrorMsg('');
 
-    const safeEmail = email.trim().toLowerCase();
-
     // Validate password
     const pwdError = validatePassword(password);
     if (pwdError) {
@@ -49,17 +49,20 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(safeEmail)) {
-      setErrorMsg('Please enter a valid email address.');
+    setIsLoading(true);
+
+    // Validate email format
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      setEmailError(emailCheck.error);
+      setIsLoading(false);
       return;
     }
-
-    setIsLoading(true);
+    setEmailError('');
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: safeEmail,
+        email: emailCheck.normalized,
         password,
       });
 
@@ -286,12 +289,14 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
                         <input
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
+                          onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); }}
+                          onBlur={() => { if (email) { const r = validateEmail(email); if (!r.valid) setEmailError(r.error); else setEmailError(''); } }}
                           placeholder="you@example.com"
-                          className="w-full px-4 py-3 border border-gray-200 bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C518] focus:border-transparent transition-all duration-200 pl-12"
+                          className={`w-full px-4 py-3 border bg-white text-[#1A1A1A] rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 pl-12 ${emailError ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 focus:ring-[#F5C518]'}`}
                           required
                         />
                       </div>
+                      {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
                     </div>
 
                     {/* Password */}
