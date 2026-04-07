@@ -1,7 +1,7 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  User, Mail, Phone, MapPin, GraduationCap, Star, Edit2, Camera, CheckCircle, BookOpen, Calendar, LogOut
+  User, Mail, Phone, MapPin, GraduationCap, Star, Edit2, Camera, CheckCircle, BookOpen, Calendar, LogOut, MessageSquare
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
@@ -33,6 +33,7 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
     avatar_url: ''
   });
   const [ratingData, setRatingData] = useState({ average: 0, count: 0 });
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
 
   useEffect(() => {
     fetchProfile();
@@ -76,6 +77,7 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
       if (res.ok) {
         const json = await res.json();
         setRatingData({ average: json.average || 0, count: json.count || 0 });
+        setReviewsList(json.data || []);
       }
     } catch (e) {
       console.error(e);
@@ -85,11 +87,6 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
   const handleSave = async () => {
     if (!isEditing) {
       setIsEditing(true);
-      return;
-    }
-
-    if (profileData.phone && profileData.phone.length !== 10) {
-      showToast('Phone number must be exactly 10 digits', 'error');
       return;
     }
 
@@ -311,7 +308,7 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
                     <input
                       type="tel"
                       value={profileData.phone}
-                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value.replace(/\D/g, '') })}
+                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                       disabled={!isEditing}
                       className="bg-transparent flex-1 focus:outline-none text-[#1A1A1A] dark:text-white disabled:text-gray-600 dark:disabled:text-gray-500"
                     />
@@ -383,6 +380,50 @@ export function StudentProfile({ onNavigate, onLogout }: StudentProfileProps) {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Reviews from Employers */}
+          <div className="bg-white dark:bg-[#2D2D2D] rounded-2xl p-6 card-shadow mt-8 border border-transparent dark:border-gray-800">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-[#1A1A1A] dark:text-white flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#F5C518]" />
+                Reviews from Employers
+              </h3>
+              <span className="text-sm text-gray-400 dark:text-gray-500">{reviewsList.length} review{reviewsList.length !== 1 ? 's' : ''}</span>
+            </div>
+            {reviewsList.length === 0 ? (
+              <div className="text-center py-10">
+                <div className="w-14 h-14 bg-gray-100 dark:bg-[#1A1A1A] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Star className="w-7 h-7 text-gray-300 dark:text-gray-600" />
+                </div>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No reviews yet. Complete shifts to get your first rating!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviewsList.map((review: any) => (
+                  <div key={review.id} className="p-4 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-[#1A1A1A] dark:text-white text-sm">
+                          {review.profiles?.company_name || review.profiles?.full_name || 'Employer'}
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                          {new Date(review.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map(s => (
+                          <Star key={s} className={`w-4 h-4 ${s <= review.rating ? 'fill-[#F5C518] text-[#F5C518]' : 'text-gray-300 dark:text-gray-600'}`} />
+                        ))}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 italic">"{review.comment}"</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
