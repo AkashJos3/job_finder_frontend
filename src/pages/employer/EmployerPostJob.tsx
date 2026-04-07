@@ -308,8 +308,8 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                       </div>
 
                       {/* Wage, Timing, Vacancies */}
-                      <div className="grid md:grid-cols-3 gap-6">
-                        <div className="flex flex-col h-full">
+                      <div className="grid md:grid-cols-4 gap-6">
+                        <div className="flex flex-col h-full md:col-span-1">
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
                             Wage (₹ per day)
                           </label>
@@ -325,7 +325,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">/day</span>
                           </div>
                         </div>
-                        <div className="flex flex-col h-full">
+                        <div className="flex flex-col h-full md:col-span-2">
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate">
                             Shift Timing
                           </label>
@@ -365,7 +365,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                             />
                           </div>
                         </div>
-                        <div className="flex flex-col h-full">
+                        <div className="flex flex-col h-full md:col-span-1">
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate" title="Number of people needed">
                             Openings
                           </label>
