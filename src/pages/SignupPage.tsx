@@ -79,8 +79,7 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
 
         if (profileError) throw profileError;
 
-        // Show email verification alert and immediately redirect to login
-        alert('Account created! Please check your inbox (and spam folder) for the verification link before logging in.');
+        // Immediately redirect to login without alert
         onNavigate('login');
       }
     } catch (err: any) {
