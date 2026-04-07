@@ -66,6 +66,7 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
   const [ratingModal, setRatingModal] = useState<{ isOpen: boolean; shift: any; rating: number; comment: string }>({
     isOpen: false, shift: null, rating: 0, comment: ''
   });
+  const [ratedStudentIds, setRatedStudentIds] = useState<Set<string>>(new Set());
 
   const getSession = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -108,6 +109,21 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
   useEffect(() => {
     fetchShifts();
     fetchJobsAndApplicants();
+    // Fetch existing reviews by this employer to know who's already been rated
+    (async () => {
+      try {
+        const session = await getSession();
+        if (!session) return;
+        const res = await fetch(`${API_URL}/api/reviews/by-employer`, {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const ids = new Set<string>((json.data || []).map((r: any) => r.student_id));
+          setRatedStudentIds(ids);
+        }
+      } catch (e) { console.error(e); }
+    })();
   }, [fetchShifts, fetchJobsAndApplicants]);
 
   // Week days array
@@ -186,11 +202,18 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
     try {
       const session = await getSession();
       if (!session) return;
-      await fetch(`${API_URL}/api/reviews`, {
+      const res = await fetch(`${API_URL}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ student_id: ratingModal.shift.student_id, rating: ratingModal.rating, comment: ratingModal.comment })
       });
+      if (res.status === 409) {
+        alert('You have already rated this student.');
+        setRatedStudentIds(prev => new Set(prev).add(ratingModal.shift.student_id));
+        setRatingModal({ isOpen: false, shift: null, rating: 0, comment: '' });
+        return;
+      }
+      setRatedStudentIds(prev => new Set(prev).add(ratingModal.shift.student_id));
       setRatingModal({ isOpen: false, shift: null, rating: 0, comment: '' });
       alert('Review submitted!');
     } catch (e) { console.error(e); }
@@ -467,10 +490,15 @@ export function EmployerShifts({ onNavigate, onLogout }: EmployerShiftsProps) {
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2">
-                      {shift.status === 'Completed' && shift.student_id && (
+                      {shift.status === 'Completed' && shift.student_id && !ratedStudentIds.has(shift.student_id) && (
                         <button title="Rate Student" onClick={() => setRatingModal({ isOpen: true, shift, rating: 0, comment: '' })}
                           className="w-9 h-9 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-900/60 transition-colors"
                         ><Star className="w-4 h-4 fill-current" /></button>
+                      )}
+                      {shift.status === 'Completed' && shift.student_id && ratedStudentIds.has(shift.student_id) && (
+                        <span title="Already Rated" className="w-9 h-9 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center text-green-500 dark:text-green-400 cursor-default">
+                          <Star className="w-4 h-4 fill-current" />
+                        </span>
                       )}
                       {shift.status === 'Pending' && (
                         <button title="Confirm" onClick={() => updateShiftStatus(shift.id, 'Confirmed')}
