@@ -8,6 +8,7 @@ import ReactConfetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { supabase } from '../../lib/supabaseClient';
 import { EmployerSidebar } from '../../components/layout/EmployerSidebar';
+import { formatTime24to12 } from '../../lib/formatters';
 
 interface EmployerPostJobProps {
   onNavigate: (view: PageView) => void;
@@ -23,7 +24,8 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
   const [description, setDescription] = useState('');
   const [wage, setWage] = useState('');
   const [vacancies, setVacancies] = useState('1');
-  const [timing, setTiming] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -106,7 +108,9 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
           if (parsedData.title) setJobTitle(parsedData.title);
           if (parsedData.description) setDescription(parsedData.description);
           if (parsedData.wage) setWage(parsedData.wage);
-          if (parsedData.requirements) setTiming(parsedData.requirements);
+          if (parsedData.requirements) {
+            // Note: AI might still return a descriptive string. We can try to parse it or just ignore.
+          }
           if (parsedData.location) setLocation(parsedData.location);
         } catch (err: any) {
           setErrorMsg('AI Parsing Error: ' + err.message);
@@ -155,7 +159,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
           location: location,
           description: description,
           urgent: isUrgent,
-          requirements: timing,
+          requirements: startTime && endTime ? `${formatTime24to12(startTime)} – ${formatTime24to12(endTime)}` : '',
           image_url: shopImage,
           vacancies: parseInt(vacancies) || 1,
         })
@@ -304,23 +308,28 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
+                          <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate">
                             Shift Timing
                           </label>
-                          <div className="relative">
-                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                          <div className="flex items-center gap-2">
                             <input
-                              type="text"
-                              value={timing}
-                              onChange={(e) => setTiming(e.target.value)}
-                              placeholder="e.g. Mon-Fri after 4pm"
-                              className="input-field pl-12 dark:bg-[#1A1A1A] dark:border-gray-700 dark:text-white"
+                              type="time"
+                              value={startTime}
+                              onChange={(e) => setStartTime(e.target.value)}
+                              className="w-full input-field px-3 dark:bg-[#1A1A1A] dark:border-gray-700 dark:text-white"
+                            />
+                            <span className="text-gray-400">to</span>
+                            <input
+                              type="time"
+                              value={endTime}
+                              onChange={(e) => setEndTime(e.target.value)}
+                              className="w-full input-field px-3 dark:bg-[#1A1A1A] dark:border-gray-700 dark:text-white"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
-                            Number of people needed
+                          <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate" title="Number of people needed">
+                            Openings
                           </label>
                           <div className="relative">
                             <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
