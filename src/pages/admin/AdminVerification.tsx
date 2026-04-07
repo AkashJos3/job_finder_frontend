@@ -68,10 +68,10 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
     const ai = getAiAnalysis(merchant);
     if (!ai || ai.error) return <span className="text-xs text-gray-400 italic">No AI data</span>;
     const score = ai.confidence || 0;
-    if (score >= 85 && ai.recommendation === 'auto_approve') {
+    if (score >= 85 && ai.recommendation === 'high_confidence') {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-          <ShieldCheck className="w-3 h-3" />{score}% Auto
+          <ShieldCheck className="w-3 h-3" />{score}% High
         </span>
       );
     } else if (score >= 50) {
@@ -429,7 +429,7 @@ export function AdminVerification({ onNavigate, onLogout }: AdminVerificationPro
                         <Bot className="w-5 h-5 text-indigo-600" />
                         <p className="text-sm font-bold text-indigo-800">AI Verification Report</p>
                         <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold text-white ${barColor}`}>
-                          {ai.recommendation === 'auto_approve' ? '✅ Auto-Approved' : ai.recommendation === 'likely_reject' ? '❌ Suspicious' : '⚠️ Needs Review'}
+                          {ai.recommendation === 'high_confidence' ? '✅ High Confidence' : ai.recommendation === 'likely_reject' ? '❌ Suspicious' : '⚠️ Needs Review'}
                         </span>
                       </div>
 
