@@ -309,11 +309,11 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
 
                       {/* Wage, Timing, Vacancies */}
                       <div className="grid md:grid-cols-3 gap-6">
-                        <div>
+                        <div className="flex flex-col h-full">
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2">
                             Wage (₹ per day)
                           </label>
-                          <div className="relative">
+                          <div className="relative mt-auto">
                             <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                             <input
                               type="number"
@@ -325,7 +325,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">/day</span>
                           </div>
                         </div>
-                        <div>
+                        <div className="flex flex-col h-full">
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate">
                             Shift Timing
                           </label>
@@ -345,7 +345,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                               </button>
                             ))}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mt-auto">
                             <input
                               type="time"
                               value={startTime}
@@ -361,11 +361,11 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                             />
                           </div>
                         </div>
-                        <div>
+                        <div className="flex flex-col h-full">
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate" title="Number of people needed">
                             Openings
                           </label>
-                          <div className="relative">
+                          <div className="relative mt-auto">
                             <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                             <input
                               type="number"
