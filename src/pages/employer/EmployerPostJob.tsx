@@ -337,8 +337,12 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                                 onClick={() => setSelectedDays(prev => prev.includes(day.id) ? prev.filter(d => d !== day.id) : [...prev, day.id])}
                                 className={`w-8 h-8 rounded-full text-xs font-bold transition-colors ${
                                   selectedDays.includes(day.id)
-                                    ? 'bg-[#F5C518] text-[#1A1A1A]'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    ? day.id === 'Sun' 
+                                      ? 'bg-red-500 text-white' 
+                                      : 'bg-[#F5C518] text-[#1A1A1A]'
+                                    : day.id === 'Sun'
+                                      ? 'bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40'
+                                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 {day.label}
