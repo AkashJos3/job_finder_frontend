@@ -59,7 +59,25 @@ export function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
                 if (error) throw error;
                 await checkRoleAndLogin(data.user);
             } else if (loginMethod === 'otp' && !otpSent) {
+                // Verify the email exists before sending OTP
+                const checkRes = await fetch(`${API_URL}/api/auth/check-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
 
+                if (checkRes.status === 429) {
+                    throw new Error('Too many attempts. Please wait a minute and try again.');
+                }
+
+                if (!checkRes.ok) {
+                    throw new Error('Failed to verify account. Please try again later.');
+                }
+
+                const checkData = await checkRes.json();
+                if (!checkData.exists) {
+                    throw new Error('Account does not exist. Please create an account first.');
+                }
 
                 const { error } = await supabase.auth.signInWithOtp({
                     email,
