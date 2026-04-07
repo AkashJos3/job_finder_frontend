@@ -1,7 +1,7 @@
 import type { PageView } from '../../App';
 import { API_URL } from '../../lib/api';
 import {
-  Navigation, Bookmark, Flame, Settings, Search, Bell, AlertTriangle, Sparkles, X, Loader2
+  Navigation, Bookmark, Flame, Settings, Search, Bell, AlertTriangle, Sparkles, X, Loader2, Clock
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import ReactConfetti from 'react-confetti';
@@ -519,6 +519,11 @@ export function StudentNearbyJobs({ onNavigate, onLogout, globalSearchQuery, set
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-green-600 dark:text-green-400 font-semibold text-lg">₹{job.wage}</span>
                       <span className="text-gray-400 dark:text-gray-500">/day</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-[#1A1A1A] dark:text-white font-medium">
+                      <Clock className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                      {job.requirements || "Flexible timing"}
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
