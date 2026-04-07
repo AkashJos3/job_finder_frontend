@@ -214,193 +214,15 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
           <div className="flex items-center gap-4">
 
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">Settings</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account preferences</p>
+              <h1 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">Verification (KYC)</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your business verification</p>
             </div>
           </div>
         </header>
 
         {/* Settings Content */}
         <div className="p-8 flex-1">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Sidebar Tabs */}
-            <div className="md:col-span-1">
-              <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl card-shadow overflow-hidden">
-                <button
-                  onClick={() => setActiveTab('profile')}
-                  className={`w-full px-6 py-4 flex items-center gap-3 text-left transition-colors ${activeTab === 'profile' ? 'bg-[#F5C518]/10 text-[#1A1A1A] dark:text-white dark:bg-[#F5C518]/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                >
-                  <User className="w-5 h-5" />
-                  <span className="font-medium">Profile</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('notifications')}
-                  className={`w-full px-6 py-4 flex items-center gap-3 text-left transition-colors ${activeTab === 'notifications' ? 'bg-[#F5C518]/10 text-[#1A1A1A] dark:text-white dark:bg-[#F5C518]/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                >
-                  <BellRing className="w-5 h-5" />
-                  <span className="font-medium">Notifications</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('security')}
-                  className={`w-full px-6 py-4 flex items-center gap-3 text-left transition-colors ${activeTab === 'security' ? 'bg-[#F5C518]/10 text-[#1A1A1A] dark:text-white dark:bg-[#F5C518]/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                >
-                  <Shield className="w-5 h-5" />
-                  <span className="font-medium">Security</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('verification')}
-                  className={`w-full px-6 py-4 flex items-center gap-3 text-left transition-colors ${activeTab === 'verification' ? 'bg-[#F5C518]/10 text-[#1A1A1A] dark:text-white dark:bg-[#F5C518]/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                >
-                  <FileCheck className="w-5 h-5" />
-                  <span className="font-medium">Verification (KYC)</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="md:col-span-3">
-              {activeTab === 'profile' && (
-                <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl p-8 card-shadow">
-                  <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white mb-6">Business Profile</h2>
-
-                  {profileMsg && (
-                    <div className={`p-4 rounded-xl border mb-6 ${profileMsg.startsWith('Error') ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/50' : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900/50'}`}>
-                      {profileMsg}
-                    </div>
-                  )}
-
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Business Name</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <Building2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="text"
-                          value={profileName}
-                          onChange={(e) => setProfileName(e.target.value)}
-                          className="bg-transparent flex-1 focus:outline-none dark:text-white"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Email</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <Mail className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="email"
-                          value={profileEmail}
-                          readOnly
-                          className="bg-transparent flex-1 focus:outline-none text-gray-500 cursor-not-allowed"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Phone</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <Phone className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="tel"
-                          value={profilePhone}
-                          onChange={(e) => setProfilePhone(e.target.value)}
-                          placeholder="+91"
-                          className="bg-transparent flex-1 focus:outline-none dark:text-white dark:placeholder-gray-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Address</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <MapPin className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="text"
-                          value={profileAddress}
-                          onChange={(e) => setProfileAddress(e.target.value)}
-                          placeholder="e.g. 123 Street, City"
-                          className="bg-transparent flex-1 focus:outline-none dark:text-white dark:placeholder-gray-500"
-                        />
-                      </div>
-                    </div>
-                    <button onClick={handleSaveProfile} disabled={isSavingProfile} className="btn-primary w-full disabled:opacity-50">
-                      {isSavingProfile ? 'Saving...' : 'Save Changes'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'notifications' && (
-                <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl p-8 card-shadow">
-                  <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white mb-6">Notification Preferences</h2>
-                  <div className="space-y-4">
-                    {[
-                      { label: 'New Applications', desc: 'Get notified when someone applies to your job', checked: true },
-                      { label: 'Messages', desc: 'Get notified when you receive a new message', checked: true },
-                      { label: 'Shift Reminders', desc: 'Get reminded about upcoming shifts', checked: true },
-                      { label: 'Marketing Emails', desc: 'Receive updates about new features and offers', checked: false },
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 border border-gray-100 dark:border-gray-700 rounded-xl">
-                        <div>
-                          <p className="font-medium text-[#1A1A1A] dark:text-white">{item.label}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
-                        </div>
-                        <button
-                          className={`w-12 h-6 rounded-full transition-colors relative ${item.checked ? 'bg-[#F5C518]' : 'bg-gray-200 dark:bg-gray-600'
-                            }`}
-                        >
-                          <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${item.checked ? 'left-7' : 'left-1'
-                            }`}></span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'security' && (
-                <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl p-8 card-shadow">
-                  <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white mb-6">Security Settings</h2>
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Current Password</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <Lock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="password"
-                          placeholder="Enter current password"
-                          className="bg-transparent flex-1 focus:outline-none dark:text-white dark:placeholder-gray-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">New Password</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <Lock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="password"
-                          placeholder="Enter new password"
-                          className="bg-transparent flex-1 focus:outline-none dark:text-white dark:placeholder-gray-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Confirm New Password</label>
-                      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-transparent dark:border-gray-700">
-                        <Lock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                        <input
-                          type="password"
-                          placeholder="Confirm new password"
-                          className="bg-transparent flex-1 focus:outline-none dark:text-white dark:placeholder-gray-500"
-                        />
-                      </div>
-                    </div>
-                    <button className="btn-primary w-full">Update Password</button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'verification' && (
+          <div className="max-w-4xl mx-auto">
                 <div className="bg-white dark:bg-[#2D2D2D] border border-transparent dark:border-gray-800 rounded-2xl p-8 card-shadow">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/40 rounded-xl flex items-center justify-center">
@@ -555,9 +377,8 @@ export function EmployerSettings({ onNavigate, onLogout, initialTab = 'profile' 
                   </>
                   )}
                   </div>
+                  </div>
                 </div>
-              )}
-            </div>
           </div>
         </div>
 

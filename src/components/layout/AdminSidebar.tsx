@@ -45,7 +45,6 @@ export function AdminSidebar({ activeView, onNavigate, onLogout }: AdminSidebarP
         { icon: Users, label: 'Employers', view: 'admin-employers' as PageView },
         { icon: Users, label: 'Students', view: 'admin-students' as PageView },
         { icon: Briefcase, label: 'Job Reports', view: 'admin-reports' as PageView },
-        { icon: Settings, label: 'Settings', view: 'admin-settings' as PageView },
     ];
 
     return (
