@@ -26,6 +26,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
   const [vacancies, setVacancies] = useState('1');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [location, setLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -69,6 +70,16 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
       description: 'Ensure your address is accurate for students relying on public transit.',
       icon: Check,
     },
+  ];
+
+  const WEEKDAYS = [
+    { id: 'Mon', label: 'M' },
+    { id: 'Tue', label: 'T' },
+    { id: 'Wed', label: 'W' },
+    { id: 'Thu', label: 'T' },
+    { id: 'Fri', label: 'F' },
+    { id: 'Sat', label: 'S' },
+    { id: 'Sun', label: 'S' }
   ];
 
   const handleAutoFill = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,6 +157,13 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
+      const formatRequirements = () => {
+        let reqs = '';
+        if (selectedDays.length > 0) reqs += selectedDays.join(', ') + ' | ';
+        if (startTime && endTime) reqs += `${formatTime24to12(startTime)} – ${formatTime24to12(endTime)}`;
+        return reqs;
+      };
+
       const response = await fetch(`${API_URL}/api/jobs`, {
         method: 'POST',
         headers: {
@@ -159,7 +177,7 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
           location: location,
           description: description,
           urgent: isUrgent,
-          requirements: startTime && endTime ? `${formatTime24to12(startTime)} – ${formatTime24to12(endTime)}` : '',
+          requirements: formatRequirements(),
           image_url: shopImage,
           vacancies: parseInt(vacancies) || 1,
         })
@@ -311,6 +329,22 @@ export function EmployerPostJob({ onNavigate, onLogout }: EmployerPostJobProps) 
                           <label className="block text-sm font-medium text-[#1A1A1A] dark:text-white mb-2 truncate">
                             Shift Timing
                           </label>
+                          <div className="flex gap-1 mb-2">
+                            {WEEKDAYS.map((day) => (
+                              <button
+                                key={day.id}
+                                type="button"
+                                onClick={() => setSelectedDays(prev => prev.includes(day.id) ? prev.filter(d => d !== day.id) : [...prev, day.id])}
+                                className={`w-8 h-8 rounded-full text-xs font-bold transition-colors ${
+                                  selectedDays.includes(day.id)
+                                    ? 'bg-[#F5C518] text-[#1A1A1A]'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                {day.label}
+                              </button>
+                            ))}
+                          </div>
                           <div className="flex items-center gap-2">
                             <input
                               type="time"
