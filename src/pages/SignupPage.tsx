@@ -20,7 +20,6 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [emailError, setEmailError] = useState('');
-  const [signedUp, setSignedUp] = useState(false);
 
   // Password Validation
   const validatePassword = (pass: string) => {
@@ -80,8 +79,9 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
 
         if (profileError) throw profileError;
 
-        // Show email verification screen — do NOT auto-login
-        setSignedUp(true);
+        // Show email verification alert and immediately redirect to login
+        alert('Account created! Please check your inbox (and spam folder) for the verification link before logging in.');
+        onNavigate('login');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'An error occurred during signup');
@@ -177,33 +177,9 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
               </div>
             </div>
 
-            {/* Right Side - Form or Confirmation */}
+            {/* Right Side - Form */}
             <div className="p-10 lg:p-12">
-              {signedUp ? (
-                /* Email Verification Confirmation */
-                <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                    <CheckCircle className="w-10 h-10 text-green-500" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">Account Created!</h2>
-                  <p className="text-gray-600 mb-2">
-                    We've sent a verification link to
-                  </p>
-                  <p className="font-semibold text-[#1A1A1A] mb-6">{email}</p>
-                  <p className="text-gray-500 text-sm mb-8 leading-relaxed max-w-xs">
-                    Please check your inbox (and spam folder) and click the verification link before signing in.
-                  </p>
-                  <button
-                    onClick={() => onNavigate('login')}
-                    className="w-full btn-dark py-4 text-base font-semibold flex items-center justify-center gap-2"
-                  >
-                    Go to Sign In
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </div>
-              ) : (
-                /* Sign Up Form */
-                <>
+              <>
                   <div className="mb-8">
                     <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">Create an account</h2>
                     <p className="text-gray-600">
@@ -363,7 +339,6 @@ export function SignUpPage({ onNavigate, initialRole = 'student' }: SignUpPagePr
                     </button>.
                   </p>
                 </>
-              )}
             </div>
           </div>
         </div>
